@@ -1,2 +1,2 @@
-# Coding-from-A-Level
-All of the programming I've done at A-Level
+# Coding from A-Level
+This contains all of the programming I have done in A-Level computer science
