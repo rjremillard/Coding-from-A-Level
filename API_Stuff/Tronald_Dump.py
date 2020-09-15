@@ -41,7 +41,7 @@ def lookup():
 	# If all good
 	if resp.status_code == 200:
 		data = resp.json()
-		messagebox.showinfo(data["value"])
+		messagebox.showinfo(data["value"], "Visit: %s" % data["_links"]["self"]["href"])
 		print(data)
 
 		# TODO: Fix this
