@@ -1,0 +1,16 @@
+{
+  "english": [
+    ["What is Eva Smiths alternate name?", ["Daisy Reynolds", "Daisy Renton", "Day Renton", "Renton Daisy"], 1],
+    ["What is the inspectors name?", ["John", "Goole", "Google", "Ghost"], 2],
+    ["What is MR Birlings' son called?", ["Gerald", "Eric", "Charles", "Sheila"], 1],
+    ["Who wrote An Inspector calls?", ["Priestley", "Stevenson", "Sanderson", "Preslay"], 0],
+    ["How much money did Eric steal from Mr Birling?", ["£50", "£45", "£55", "£49.99"], 0]
+  ],
+  "maths": [
+    ["What is 100+50?", ["125", "150", "200", "105"], 1],
+    ["What is 200-100", ["100", "300", "400", "210"], 0],
+    ["What is 10x10", ["100", "20", "1000", "111"], 0],
+    ["What is 50+50", ["100", "50", "25", "55"], 0],
+    ["What is 100-50", ["150", "50", "500", "105"], 1]
+  ]
+}
