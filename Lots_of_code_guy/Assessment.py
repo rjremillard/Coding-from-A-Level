@@ -51,20 +51,20 @@ while not stop:
 				print("Wrong, it was %s" % q[1][q[2]])
 
 		# final score
-		print("You got %d, which is %d%s" % (score, (score / 5) * 100, "%"))
+		print("You got %d right, which is %d%s" % (score, (score / 5) * 100, "%"))
 
 		with open("History.json", "r") as f:
 			history = json.load(f)
 
 		# if they exist
 		if name in history:
-			history[name]["scores"].append(str(score))
+			history[name]["scores"].append("%s (%d): %d" % (topic, diff, score))
 
 		else:
 			history[name] = {
 				"age": age,
 				"username": username,
-				"scores": [str(score)],
+				"scores": ["%s (%d): %d" % (topic, diff, score)],
 				"password": password
 			}
 

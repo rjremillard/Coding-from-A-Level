@@ -1,4 +1,3 @@
-
 def func1(num: int) -> int:
 	return num ** 3
 
@@ -13,3 +12,4 @@ def func3(num1: int, num2: int) -> int:
 
 def func4(string: str, letter: str) -> int:
 	return string.count(letter)
+
