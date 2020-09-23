@@ -6,16 +6,16 @@ class Linear:
 		self.queue = [None for _ in range(size)]
 
 	def enQueue(self, item: any):
-		if self.isEmpty():
-			raise Exception("Queue Full")
+		if self.isFull():
+			raise IndexError("Queue Full")
 		else:
 			self.size += 1
 			self.rear += 1
 			self.queue[self.rear] = item
 
 	def deQueue(self):
-		if self.isFull():
-			raise Exception("Queue Empty")
+		if self.isEmpty():
+			raise IndexError("Queue Empty")
 		else:
 			toReturn = self.queue[self.front]
 			self.queue[self.front] = None
@@ -24,17 +24,17 @@ class Linear:
 			return toReturn
 
 	def isFull(self):
-		return self.size == self.maxSize
+		return self.queue[-1]
 
 	def isEmpty(self):
 		return self.size == 0
 
 
 class Circular(Linear):
-	# Inherited: __init__, isFull, isEmpty
+	# Inherited: __init__, isEmpty
 	def enQueue(self, item: any):
 		if self.isFull():
-			raise Exception("Queue Full")
+			raise IndexError("Queue Full")
 		else:
 			self.size += 1
 			self.rear = (self.rear + 1) % self.maxSize
@@ -42,7 +42,7 @@ class Circular(Linear):
 
 	def deQueue(self):
 		if self.isEmpty():
-			raise Exception("Queue Empty")
+			raise IndexError("Queue Empty")
 		else:
 			toReturn = self.queue[self.front]
 			self.queue[self.front] = None
@@ -50,10 +50,13 @@ class Circular(Linear):
 			self.size -= 1
 			return toReturn
 
+	def isFull(self):
+		return self.size == self.maxSize
+
 
 # Testing
 
-queue = Linear(5)  # Change to Circular to test
+queue = Circular(int(input("Size: ")))  # Change to Circular to test
 
 while True:
 	choice = input("""
