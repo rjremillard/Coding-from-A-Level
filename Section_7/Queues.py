@@ -55,6 +55,7 @@ class Circular(Linear):
 
 
 class Priority(Linear):
+	# TODO: Fix me
 	# Inheriting __init__, isFull, isEmpty
 	def sort_(self):
 		self.queue = sorted(self.queue, key=lambda x: x[1])
