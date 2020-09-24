@@ -54,9 +54,24 @@ class Circular(Linear):
 		return self.size == self.maxSize
 
 
+class Priority(Linear):
+	# Inheriting __init__, isFull, isEmpty
+	def sort_(self):
+		self.queue = sorted(self.queue, key=lambda x: x[1])
+
+	def enQueue_(self, item):
+		self.enQueue(item)
+		self.sort_()
+
+	def deQueue_(self):
+		toReturn = self.deQueue()
+		self.sort_()
+		return toReturn
+
+
 # Testing
 
-queue = Circular(int(input("Size: ")))  # Change to Circular to test
+queue = Linear(int(input("Size: ")))  # Change to Circular to test
 
 while True:
 	choice = input("""
