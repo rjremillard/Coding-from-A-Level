@@ -65,9 +65,6 @@ class Priority:
 		self.maxSize = size
 		self.queue = [[None, 4] for _ in range(size)]
 
-	def sort_(self):
-		self.queue.sort(key=lambda x: x[1])
-
 	def enQueue(self, item: any, priority: int):
 		if self.isFull():
 			raise IndexError("Queue full")
@@ -75,7 +72,7 @@ class Priority:
 			self.size += 1
 			self.rear += 1
 			self.queue[self.rear] = [item, priority]
-			self.sort_()
+			self.queue.sort(key=lambda x: x[1])
 
 	def deQueue(self):
 		if self.isEmpty():
