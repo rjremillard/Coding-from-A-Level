@@ -33,6 +33,7 @@ RAM = {0: (0, 0), 1: (0, 0), 2: (0, 0), 3: (0, 0), 4: (0, 0), 5: (0, 0), 6: (0, 
 							10: (0, 0), 11: (0, 0), 12: (0, 0), 13: (0, 0), 14: (0, 0), 15: (0, 0)}
 FONT = ("Comfortaa", 10)
 stop = False
+BLACK = (0, 0, 0)
 
 """
 ------------------------------------
@@ -69,7 +70,7 @@ def submit():
 			break
 
 		else:
-			RAM[address] = (FROM_ASSEMBLY[i[:3]], (int("0b"+i[4:], base=2) if i[3:] != "" else 0))
+			RAM[address] = (FROM_ASSEMBLY[i[:3]], (int(i[4:], base=2) if i[3:] != "" else 0))
 			address += 1
 
 	if i == text[-1]:
@@ -105,12 +106,13 @@ Pygame GUI for the animation
 
 # Start pygame
 pygame.init()
+font = pygame.font.SysFont("comfortaa", 10)
 
 # Setup window
 screen = pygame.display.set_mode([1000, 750])
 
 # Variables for loop
-ac, pc, mar, mdr, cir = None, 0, None, None, None
+ac, pc, mar, mdr, cir = 0, 0, -1, 0, 0
 
 # Main game loop
 while not stop:
@@ -131,9 +133,13 @@ while not stop:
 	# Decode
 	opcode, operand = cir[0], cir[1]
 
+	# Pygame window (L for label)
+	Lac = font.render("Ac: %s" % bin(ac), 1, BLACK)
+	screen.blit(Lac, (100, 100))
+
 	# Execute
 	if opcode == 0:  # HLT
-		break
+		stop = True
 
 	elif opcode == 1:  # ADD
 		ac += RAM[operand]
