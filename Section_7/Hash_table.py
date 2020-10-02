@@ -40,11 +40,10 @@ class HashTable:
 				if self.table[index] is None or self.table[index] is False:
 					self.table[index] = item
 					done = True
+					self.size += 1
 
 				else:
-					index += self.jump
-					if index > self.maxSize:
-						index = self.maxSize - index - 1
+					index = (index + self.jump) % self.maxSize
 
 	def remove(self, item: any):
 		if self.isEmpty():
@@ -62,21 +61,44 @@ class HashTable:
 				if self.table[index] == item:
 					done = True
 					self.table[index] = False
+					self.size -= 1
 
 				elif self.table[index] is None:
 					raise IndexError("Item not in table")
 
 				else:
-					index += self.jump
+					index = (index + self.jump) % self.maxSize
+
+	def find(self, item: any):
+		if self.isEmpty():
+			raise IndexError("Hash Table is empty")
+
+		elif type(item) is int:
+			index = self.hash(int(item))
+
+		elif type(item) is str:
+			index = self.hash(sum(map(ord, item)))
+
+		if "index" in locals():
+			done = False
+			while not done:
+				if self.table[index] == item:
+					return True
+
+				elif self.table[index] is None:
+					return False
+
+				else:
+					index = (index + self.jump) % self.maxSize
 
 	def hash(self, item: int) -> int:
 		return (item ** 2) % self.maxSize
 
 	def isFull(self) -> bool:
-		return bool(self.size)
+		return self.size == self.maxSize
 
 	def isEmpty(self) -> bool:
-		return not self.size
+		return self.size == 0
 
 
 # Testing
@@ -87,7 +109,8 @@ while not stop:
 	1. Add
 	2. Remove
 	3. Print
-	4. Quit
+	4. Find
+	5. Quit
 	> """)
 
 	if choice == "1":
@@ -100,6 +123,9 @@ while not stop:
 		print("Table: %s" % ", ".join(map(str, table.table)))
 
 	elif choice == "4":
+		print("Item is%s in table" % ("" if table.find(input("Item to find: ")) else "n't"))
+
+	elif choice == "5":
 		stop = True
 
 	else:
