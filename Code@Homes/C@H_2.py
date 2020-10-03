@@ -77,6 +77,7 @@ def submit():
 		window.destroy()
 
 
+# Setup window
 window = tkinter.Tk()
 window.title = "Assembly Input"
 
@@ -99,64 +100,132 @@ tkinter.mainloop()
 
 
 """
-----------------------------
-Pygame GUI for the animation
-----------------------------
+------------------------------
+Tkinter window for the runtime
+------------------------------
 """
 
-# Start pygame
-pygame.init()
-font = pygame.font.SysFont("comfortaa", 10)
-
 # Setup window
-screen = pygame.display.set_mode([1000, 750])
+window = tkinter.Tk()
 
-# Variables for loop
-ac, pc, mar, mdr, cir = 0, 0, -1, 0, 0
+title = tkinter.Label(master=window, text="Step-by-step register output")
+title.grid(column=0, row=0, columnspan=3, padx=10, pady=10)
+
+pcLabel = tkinter.Label(master=window, text="")
+pcLabel.grid(column=0, row=1, padx=10, pady=10)
+
+acLabel = tkinter.Label(master=window, text="")
+acLabel.grid(column=1, row=1, padx=10, pady=10)
+
+cirLabel = tkinter.Label(master=window, text="")
+cirLabel.grid(column=2, row=1, padx=10, pady=10)
+
+marLabel = tkinter.Label(master=window, text="")
+marLabel.grid(column=3, row=1, padx=10, pady=10)
+
+mdrLabel = tkinter.Label(master=window, text="")
+mdrLabel.grid(column=0, row=2, padx=10, pady=10)
+
+opcodeLabel = tkinter.Label(master=window, text="")
+opcodeLabel.grid(column=1, row=2, padx=10, pady=10)
+
+operandLabel = tkinter.Label(master=window, text="")
+operandLabel.grid(column=2, row=2, padx=10, pady=10)
+
+outLabel = tkinter.Label(master=window, text="")
+outLabel.grid(column=3, row=2, padx=10, pady=10)
+
+inLabel = tkinter.Label(master=window, text="Input:")
+inLabel.grid(column=0, row=3, padx=10, pady=10)
+
+inp = tkinter.Entry(master=window)
+inp.grid(column=1, row=3, columnspan=2, padx=10, pady=10)
+
+stepButt = tkinter.Button(master=window, text="Step")
+stepButt.grid(column=3, row=3, padx=10, pady=10)
+
+ramLabel = tkinter.Label(master=window, text="")
+ramLabel.grid(column=0, row=4, columnspan=4, padx=10, pady=10)
+
 
 # Main game loop
-while not stop:
-	# Resetting
-	opcode, operand = "", ""
+class Runtime:
+	def __init__(self):
+		# Variables for loop
+		self.ac, self.pc, self.mar, self.mdr, self.cir = 0, 0, -1, 0, 0
 
-	# If exit pressed
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			stop = True
+	def update(self, stop_: bool):
+		# Resetting
+		opcode, operand = "", ""
 
-	# Fetch
-	mar = pc
-	mdr = RAM[mar]
-	pc += 1
-	cir = mdr
+		# Fetch
+		self.mar = self.pc
+		self.mdr = RAM[self.mar]
+		self.pc += 1
+		self.cir = self.mdr
 
-	# Decode
-	opcode, operand = cir[0], cir[1]
+		# Decode
+		opcode, operand = self.cir[0], self.cir[1]
 
-	# Pygame window (L for label)
-	Lac = font.render("Ac: %s" % bin(ac), 1, BLACK)
-	screen.blit(Lac, (100, 100))
+		# Execute
+		if opcode == 0:  # HLT
+			return True
 
-	# Execute
-	if opcode == 0:  # HLT
-		stop = True
+		elif opcode == 1:  # ADD
+			self.ac += RAM[operand]
 
-	elif opcode == 1:  # ADD
-		ac += RAM[operand]
+		elif opcode == 2:  # SUB
+			self.ac -= RAM[operand]
 
-	elif opcode == 2:  # SUB
-		ac -= RAM[operand]
+		elif opcode == 3:  # STA
+			RAM[operand] = self.ac
 
-	elif opcode == 3:  # STA
-		RAM[operand] = ac
+		elif opcode == 4:  # LDA
+			self.ac = RAM[operand]
 
-	elif opcode == 4:  # LDA
-		ac = RAM[operand]
+		elif opcode == 5:  # INP
+			self.ac = int(inp.get())  # Should be in binary
 
-	elif opcode == 5:  # INP
-		ac = int(input("Input: "))  # Should be in binary
+		elif opcode == 6:  # OUT
+			outLabel.config(text="Output: %s" % bin(self.ac))
+			outLabel.update()
 
-	elif opcode == 6:  # OUT
-		print("Output: %d" % ac)
+		# Updating window
+		pcLabel.config(text="PC: %d" % self.pc)
+		pcLabel.update()
 
-print("Stopped")
+		acLabel.config(text="AC: %s" % bin(self.ac))
+		acLabel.update()
+
+		cirLabel.config(text="CIR: %s" % bin(self.cir))
+		cirLabel.update()
+
+		marLabel.config(text="MAR: %s" % bin(self.mar))
+		marLabel.update()
+
+		mdrLabel.config(text="MDR: %s" % bin(self.mdr))
+		mdrLabel.update()
+
+		opcodeLabel.config(text="Opcode: %s" % bin(opcode))
+		opcodeLabel.update()
+
+		operandLabel.config(text="Operand: %s" % bin(operand))
+		operandLabel.update()
+
+		ramLabel.config(text="RAM: %s" % ("%s: %s" % (bin(i), bin(RAM[i])) for i in RAM))
+		ramLabel.update()
+
+	print("Stopped")
+
+
+def main_():
+	global stop
+	while not stop:
+		stop = runtime.update(stop)
+
+
+runtime = Runtime()
+
+window.after(100, main_)
+
+tkinter.mainloop()
