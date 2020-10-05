@@ -28,13 +28,9 @@ class HashTable:
 		if self.isFull():
 			raise IndexError("Hash Table is full")
 
-		elif item.isnumeric():
-			index = self.hash(int(item))
-
 		else:
-			index = self.hash(sum(map(ord, item)))
+			index = self.hash(sum(map(ord, str(item))))
 
-		if "index" in locals():
 			done = False
 			while not done:
 				if self.table[index] is None or self.table[index] is False:
@@ -49,13 +45,9 @@ class HashTable:
 		if self.isEmpty():
 			raise IndexError("Hash Table is empty")
 
-		elif type(item) is int:
-			index = self.hash(int(item))
+		else:
+			index = self.hash(sum(map(ord, str(item))))
 
-		elif type(item) is str:
-			index = self.hash(sum(map(ord, item)))
-
-		if "index" in locals():
 			done = False
 			while not done:
 				if self.table[index] == item:
@@ -73,13 +65,9 @@ class HashTable:
 		if self.isEmpty():
 			raise IndexError("Hash Table is empty")
 
-		elif type(item) is int:
-			index = self.hash(int(item))
+		else:
+			index = self.hash(sum(map(ord, str(item))))
 
-		elif type(item) is str:
-			index = self.hash(sum(map(ord, item)))
-
-		if "index" in locals():
 			done = False
 			while not done:
 				if self.table[index] == item:
