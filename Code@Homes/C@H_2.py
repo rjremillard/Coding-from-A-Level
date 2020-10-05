@@ -1,23 +1,9 @@
 """
-An animation of the FDE cycle
-
-Can translate following assembly: HLT, ADD, SUB, STA, LDA, INP, OUT
+Can translate following assembly: HLT (0), ADD (1), SUB (2), STA(3), LDA (4), INP (5), OUT (6)
+Data opcode will be 7
 
 Opcode length:  4 bits
 Operand length: 4 bits
-
-Co-ords (for pygame):
-	- AC    ::
-	- ALU   ::
-	- CU    ::
-	- Registers:
-		- PC    ::
-		- MAR   ::
-		- MDR   ::
-		- CIR   ::
-	- Memory:
-		- 0b000 ::
-		- ...
 
 Binary was being annoying so I used decimal for the backend instead
 """
@@ -109,7 +95,7 @@ Tkinter window for the runtime
 window = tkinter.Tk()
 
 title = tkinter.Label(master=window, text="Step-by-step register output")
-title.grid(column=0, row=0, columnspan=3, padx=10, pady=10)
+title.grid(column=1, row=0, columnspan=2, padx=10, pady=10)
 
 pcLabel = tkinter.Label(master=window, text="")
 pcLabel.grid(column=0, row=1, padx=10, pady=10)
@@ -135,97 +121,124 @@ operandLabel.grid(column=2, row=2, padx=10, pady=10)
 outLabel = tkinter.Label(master=window, text="")
 outLabel.grid(column=3, row=2, padx=10, pady=10)
 
-inLabel = tkinter.Label(master=window, text="Input:")
-inLabel.grid(column=0, row=3, padx=10, pady=10)
 
-inp = tkinter.Entry(master=window)
-inp.grid(column=1, row=3, columnspan=2, padx=10, pady=10)
+def main_():
+	global stop
+	stop = runtime.update()
+	if stop:
+		window.quit()
 
-stepButt = tkinter.Button(master=window, text="Step")
-stepButt.grid(column=3, row=3, padx=10, pady=10)
+
+stepButt = tkinter.Button(master=window, text="Step", command=main_)
+stepButt.grid(column=1, row=3, columnspan=2, padx=10, pady=10)
 
 ramLabel = tkinter.Label(master=window, text="")
 ramLabel.grid(column=0, row=4, columnspan=4, padx=10, pady=10)
 
 
 # Main game loop
+def niceBinary(binary: any) -> str:
+	if type(binary) is tuple:
+		newBin = bin(binary[1])[2:]
+	else:
+		newBin = bin(binary)[2:]
+	return ("0" * (4 - len(newBin))) + newBin
+
+
 class Runtime:
 	def __init__(self):
 		# Variables for loop
-		self.ac, self.pc, self.mar, self.mdr, self.cir = 0, 0, -1, 0, 0
+		self.ac, self.pc, self.mar, self.mdr, self.cir = (0, 0), 0, -1, 0, 0
+		self.step, self.opcode, self.operand = 0, "", ""
 
-	def update(self, stop_: bool):
-		# Resetting
-		opcode, operand = "", ""
-
+	def update(self):
 		# Fetch
-		self.mar = self.pc
-		self.mdr = RAM[self.mar]
-		self.pc += 1
-		self.cir = self.mdr
+		if self.step == 0:
+			opcode, operand = "", ""
+			self.mar = self.pc
+
+			if self.mar == 16:
+				return True
+
+			self.mdr = RAM[self.mar]
+			self.pc += 1
+			self.cir = self.mdr
 
 		# Decode
-		opcode, operand = self.cir[0], self.cir[1]
+		if self.step == 1:
+			self.opcode, self.operand = self.cir[0], self.cir[1]
 
 		# Execute
-		if opcode == 0:  # HLT
-			return True
+		if self.step == 2:
+			if self.opcode == 0:  # HLT
+				return True
 
-		elif opcode == 1:  # ADD
-			self.ac += RAM[operand]
+			elif self.opcode == 1:  # ADD
+				# TODO: Fix ADD
+				self.ac += RAM[self.operand][1]
 
-		elif opcode == 2:  # SUB
-			self.ac -= RAM[operand]
+			elif self.opcode == 2:  # SUB
+				self.ac -= RAM[self.operand][1]
 
-		elif opcode == 3:  # STA
-			RAM[operand] = self.ac
+			elif self.opcode == 3:  # STA
+				RAM[self.operand] = (7, self.ac)
 
-		elif opcode == 4:  # LDA
-			self.ac = RAM[operand]
+			elif self.opcode == 4:  # LDA
+				self.ac = RAM[self.operand][1]
 
-		elif opcode == 5:  # INP
-			self.ac = int(inp.get())  # Should be in binary
+			elif self.opcode == 5:  # INP
 
-		elif opcode == 6:  # OUT
-			outLabel.config(text="Output: %s" % bin(self.ac))
-			outLabel.update()
+				def sub(s):
+					inp = inpEntry.get()
+
+					if inp != "" and inp.isnumeric():
+						s.ac = (7, int(inp))  # Should be in binary
+						inpWin.destroy()
+
+				# Make new input window
+				inpWin = tkinter.Tk()
+
+				inpLabel = tkinter.Label(master=inpWin, text="Input:")
+				inpLabel.grid(column=0, row=0, padx=10, pady=10)
+
+				inpEntry = tkinter.Entry(master=inpWin)
+				inpEntry.grid(column=1, row=0, padx=10, pady=10)
+
+				submitButt = tkinter.Button(master=inpWin, text="Submit", command=lambda: sub(self))
+				submitButt.grid(column=0, row=1, columnspan=2, padx=10, pady=10)
+
+			elif self.opcode == 6:  # OUT
+				outLabel.config(text="Output: %s" % niceBinary(self.ac))
+				outLabel.update_idletasks()
 
 		# Updating window
-		pcLabel.config(text="PC: %d" % self.pc)
-		pcLabel.update()
+		pcLabel.config(text="PC: %s" % niceBinary(self.pc))
+		pcLabel.update_idletasks()
 
-		acLabel.config(text="AC: %s" % bin(self.ac))
-		acLabel.update()
+		acLabel.config(text="AC: %s" % niceBinary(self.ac[1]))
+		acLabel.update_idletasks()
 
-		cirLabel.config(text="CIR: %s" % bin(self.cir))
-		cirLabel.update()
+		cirLabel.config(text="CIR: %s %s" % (niceBinary(self.cir[0]), niceBinary(self.cir[1])))
+		cirLabel.update_idletasks()
 
-		marLabel.config(text="MAR: %s" % bin(self.mar))
-		marLabel.update()
+		marLabel.config(text="MAR: %s" % niceBinary(self.mar))
+		marLabel.update_idletasks()
 
-		mdrLabel.config(text="MDR: %s" % bin(self.mdr))
-		mdrLabel.update()
+		mdrLabel.config(text="MDR: %s %s" % (niceBinary(self.mdr[0]), niceBinary(self.mdr[1])))
+		mdrLabel.update_idletasks()
 
-		opcodeLabel.config(text="Opcode: %s" % bin(opcode))
-		opcodeLabel.update()
+		opcodeLabel.config(text="Opcode: %s" % (niceBinary(self.opcode) if self.opcode != "" else ""))
+		opcodeLabel.update_idletasks()
 
-		operandLabel.config(text="Operand: %s" % bin(operand))
-		operandLabel.update()
+		operandLabel.config(text="Operand: %s" % (niceBinary(self.operand) if self.operand != "" else ""))
+		operandLabel.update_idletasks()
 
-		ramLabel.config(text="RAM: %s" % ("%s: %s" % (bin(i), bin(RAM[i])) for i in RAM))
-		ramLabel.update()
+		ramLabel.config(text="RAM:\n" + ", ".join(("%s: %s %s" % (niceBinary(i), niceBinary(RAM[i][0]),
+													niceBinary(RAM[i][1])) for i in RAM)))
+		ramLabel.update_idletasks()
 
-	print("Stopped")
-
-
-def main_():
-	global stop
-	while not stop:
-		stop = runtime.update(stop)
+		self.step = (self.step + 1) % 3
 
 
 runtime = Runtime()
-
-window.after(100, main_)
-
 tkinter.mainloop()
