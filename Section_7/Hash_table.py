@@ -29,7 +29,7 @@ class HashTable:
 			raise IndexError("Hash Table is full")
 
 		else:
-			index = self.hash(sum(map(ord, str(item))))
+			index = self.hash(sum(map(ord, item)))
 
 			done = False
 			while not done:
@@ -46,7 +46,7 @@ class HashTable:
 			raise IndexError("Hash Table is empty")
 
 		else:
-			index = self.hash(sum(map(ord, str(item))))
+			index = self.hash(sum(map(ord, item)))
 
 			done = False
 			while not done:
@@ -66,7 +66,7 @@ class HashTable:
 			raise IndexError("Hash Table is empty")
 
 		else:
-			index = self.hash(sum(map(ord, str(item))))
+			index = self.hash(sum(map(ord, item)))
 
 			done = False
 			while not done:
