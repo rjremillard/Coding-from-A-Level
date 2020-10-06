@@ -15,9 +15,15 @@ ALL_CARDS = [(i, j) for i in VALUES for j in ["Hearts", "Diamonds", "Clubs", "Sp
 
 # Other variables
 go, stop = 0, False
+player, computer = [], []
 
 
-def getCard(): return random.choice(ALL_CARDS)
+def getCard() -> tuple:
+	toUse_ = random.choice(ALL_CARDS)
+	while toUse_ in player or toUse_ in computer:
+		toUse_ = getCard()
+
+	return toUse_
 
 
 # Main
@@ -31,15 +37,16 @@ while not stop:
 
 	# Game
 	game = True
-	player, computer = [getCard(), getCard()], [getCard(), getCard()]
+	player = [getCard(), getCard()]
+	computer = [getCard(), getCard()]
 	while game:
 		print("Player: %s\nComputer: %s" % (", ".join("%s of %s" % (player[i][0], player[i][1]) for i in range(len(player))),
-											", ".join("%s of %s" % (player[i][0], player[i][1]) for i in range(len(computer)))))
+											", ".join("%s of %s" % (computer[i][0], computer[i][1]) for i in range(len(computer)))))
 
 		choice = input("Stick or Twist (s or t): ")
 		if choice.lower() == "s":
 			game = False
 		else:
 			toUse = getCard()
-			while toUse in player or toUse in computer:
-				toUse = getCard()
+			player.append(toUse)
+			print("You drew: %s of %s" % (toUse[0], toUse[1]))

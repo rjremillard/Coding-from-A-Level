@@ -92,48 +92,52 @@ class Priority:
 
 
 # Testing
-for i in ["l", "c", "p"]:
-	if i == "l":
-		print(":: Linear ::")
-		queue = Linear(int(input("Size: ")))
-	elif i == "c":
-		print(":: Circular ::")
-		queue = Circular(int(input("Size: ")))
-	else:
-		print(":: Priority ::")
-		queue = Priority(int(input("Size: ")))
-
-	while True:
-		choice = input("""
-		1. Add
-		2. Remove
-		3. Check Full
-		4. Check Empty
-		5. Display
-		6. Quit
-		:: """)
-
-		if choice == "1":
-			if i == "p":
-				queue.enQueue(input("Item to add: "), int(input("Priority (0-3): ")))
-			else:
-				queue.enQueue(input("Item to add: "))
-
-		elif choice == "2":
-			print("Removed: %s" % queue.deQueue())
-
-		elif choice == "3":
-			print("Queue is%s full" % ("" if queue.isFull() else "n't"))
-
-		elif choice == "4":
-			print("Queue is%s empty" % ("" if queue.isEmpty() else "n't"))
-
-		elif choice == "5":
-			print("Queue is: %s; Front is: %d; Rear is: %d" % (queue.queue, queue.front, queue.rear))
-
-		elif choice == "6":
-			break
-
+def main():
+	for i in ["l", "c", "p"]:
+		if i == "l":
+			print(":: Linear ::")
+			queue = Linear(int(input("Size: ")))
+		elif i == "c":
+			print(":: Circular ::")
+			queue = Circular(int(input("Size: ")))
 		else:
-			print("Please enter a number between 1 and 6")
+			print(":: Priority ::")
+			queue = Priority(int(input("Size: ")))
 
+		while True:
+			choice = input("""
+			1. Add
+			2. Remove
+			3. Check Full
+			4. Check Empty
+			5. Display
+			6. Quit
+			:: """)
+
+			if choice == "1":
+				if i == "p":
+					queue.enQueue(input("Item to add: "), int(input("Priority (0-3): ")))
+				else:
+					queue.enQueue(input("Item to add: "))
+
+			elif choice == "2":
+				print("Removed: %s" % queue.deQueue())
+
+			elif choice == "3":
+				print("Queue is%s full" % ("" if queue.isFull() else "n't"))
+
+			elif choice == "4":
+				print("Queue is%s empty" % ("" if queue.isEmpty() else "n't"))
+
+			elif choice == "5":
+				print("Queue is: %s; Front is: %d; Rear is: %d" % (queue.queue, queue.front, queue.rear))
+
+			elif choice == "6":
+				break
+
+			else:
+				print("Please enter a number between 1 and 6")
+
+
+if __name__ == '__main__':
+	main()
