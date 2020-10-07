@@ -8,7 +8,7 @@ Operand length: 4 bits
 Binary was being annoying so I used decimal for the backend instead
 """
 
-import pygame
+
 import tkinter
 from tkinter import messagebox
 
@@ -17,7 +17,7 @@ from tkinter import messagebox
 FROM_ASSEMBLY = {"HLT": 0, "ADD": 1, "SUB": 2, "STA": 3, "LDA": 4, "INP": 5, "OUT": 6}
 RAM = {0: (0, 0), 1: (0, 0), 2: (0, 0), 3: (0, 0), 4: (0, 0), 5: (0, 0), 6: (0, 0), 7: (0, 0), 8: (0, 0), 9: (0, 0),
 							10: (0, 0), 11: (0, 0), 12: (0, 0), 13: (0, 0), 14: (0, 0), 15: (0, 0)}
-FONT = ("Comfortaa", 10)
+FONT = ("comfortaa", 10)
 stop = False
 BLACK = (0, 0, 0)
 
@@ -118,8 +118,8 @@ opcodeLabel.grid(column=1, row=2, padx=10, pady=10)
 operandLabel = tkinter.Label(master=window, text="")
 operandLabel.grid(column=2, row=2, padx=10, pady=10)
 
-outLabel = tkinter.Label(master=window, text="")
-outLabel.grid(column=3, row=2, padx=10, pady=10)
+stepLabel = tkinter.Label(master=window, text="")
+stepLabel.grid(column=3, row=2, padx=10, pady=10)
 
 
 def main_():
@@ -148,18 +148,13 @@ def niceBinary(binary: any) -> str:
 class Runtime:
 	def __init__(self):
 		# Variables for loop
-		self.ac, self.pc, self.mar, self.mdr, self.cir = (0, 0), 0, -1, 0, 0
+		self.ac, self.pc, self.mar, self.mdr, self.cir = 0, 0, -1, 0, 0
 		self.step, self.opcode, self.operand = 0, "", ""
 
 	def update(self):
 		# Fetch
 		if self.step == 0:
-			opcode, operand = "", ""
 			self.mar = self.pc
-
-			if self.mar == 16:
-				return True
-
 			self.mdr = RAM[self.mar]
 			self.pc += 1
 			self.cir = self.mdr
@@ -174,14 +169,14 @@ class Runtime:
 				return True
 
 			elif self.opcode == 1:  # ADD
-				# TODO: Fix ADD
-				self.ac += RAM[self.operand][1]
+				self.ac = self.ac + RAM[self.operand][1]
 
 			elif self.opcode == 2:  # SUB
-				self.ac -= RAM[self.operand][1]
+				self.ac = self.ac - RAM[self.operand][1]
 
 			elif self.opcode == 3:  # STA
 				RAM[self.operand] = (7, self.ac)
+				self.ac = 0
 
 			elif self.opcode == 4:  # LDA
 				self.ac = RAM[self.operand][1]
@@ -192,7 +187,7 @@ class Runtime:
 					inp = inpEntry.get()
 
 					if inp != "" and inp.isnumeric():
-						s.ac = (7, int(inp))  # Should be in binary
+						s.ac = int(inp)  # Should be in binary
 						inpWin.destroy()
 
 				# Make new input window
@@ -208,14 +203,13 @@ class Runtime:
 				submitButt.grid(column=0, row=1, columnspan=2, padx=10, pady=10)
 
 			elif self.opcode == 6:  # OUT
-				outLabel.config(text="Output: %s" % niceBinary(self.ac))
-				outLabel.update_idletasks()
+				messagebox.showinfo(title="Output", message="Output: %s" % niceBinary(self.ac))
 
 		# Updating window
 		pcLabel.config(text="PC: %s" % niceBinary(self.pc))
 		pcLabel.update_idletasks()
 
-		acLabel.config(text="AC: %s" % niceBinary(self.ac[1]))
+		acLabel.config(text="AC: %s" % niceBinary(self.ac))
 		acLabel.update_idletasks()
 
 		cirLabel.config(text="CIR: %s %s" % (niceBinary(self.cir[0]), niceBinary(self.cir[1])))
@@ -232,6 +226,9 @@ class Runtime:
 
 		operandLabel.config(text="Operand: %s" % (niceBinary(self.operand) if self.operand != "" else ""))
 		operandLabel.update_idletasks()
+
+		stepLabel.config(text="Step: %s" % ("Fetch" if self.step == 0 else "Decode" if self.step == 1 else "Execute"))
+		stepLabel.update_idletasks()
 
 		ramLabel.config(text="RAM:\n" + ", ".join(("%s: %s %s" % (niceBinary(i), niceBinary(RAM[i][0]),
 													niceBinary(RAM[i][1])) for i in RAM)))
