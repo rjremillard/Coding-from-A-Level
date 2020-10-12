@@ -139,5 +139,6 @@ def main():
 				print("Please enter a number between 1 and 6")
 
 
+# So can inherit
 if __name__ == '__main__':
 	main()

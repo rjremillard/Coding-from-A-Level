@@ -90,31 +90,37 @@ class HashTable:
 
 
 # Testing
-stop = False
-table = HashTable(int(input("Size (to be rounded to closest prime): ")))
-while not stop:
-	choice = input("""
-	1. Add
-	2. Remove
-	3. Print
-	4. Find
-	5. Quit
-	> """)
+def main():
+	stop = False
+	table = HashTable(int(input("Size (to be rounded to closest prime): ")))
+	while not stop:
+		choice = input("""
+		1. Add
+		2. Remove
+		3. Print
+		4. Find
+		5. Quit
+		> """)
 
-	if choice == "1":
-		table.add(input("Item to add: "))
+		if choice == "1":
+			table.add(input("Item to add: "))
 
-	elif choice == "2":
-		table.remove(input("Item to remove: "))
+		elif choice == "2":
+			table.remove(input("Item to remove: "))
 
-	elif choice == "3":
-		print("Table: %s" % ", ".join(map(str, table.table)))
+		elif choice == "3":
+			print("Table: %s" % ", ".join(map(str, table.table)))
 
-	elif choice == "4":
-		print("Item is%s in table" % ("" if table.find(input("Item to find: ")) else "n't"))
+		elif choice == "4":
+			print("Item is%s in table" % ("" if table.find(input("Item to find: ")) else "n't"))
 
-	elif choice == "5":
-		stop = True
+		elif choice == "5":
+			stop = True
 
-	else:
-		print("Enter a number between 1-4")
+		else:
+			print("Enter a number between 1-4")
+
+
+# So can inherit
+if __name__ == '__main__':
+	main()

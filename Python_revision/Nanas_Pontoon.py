@@ -4,14 +4,14 @@
 """
 
 import random
-import tkinter
-from itertools import permutations
 
 # Constants
-VALUES = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'Jack': 10, 'Queen': 10, 'King': 10,
-	'Ace': 11}
+VALUES = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'Jack': 10, 'Queen': 10,
+	'King': 10,	'Ace': 11}
 
 ALL_CARDS = [(i, j) for i in VALUES for j in ["Hearts", "Diamonds", "Clubs", "Spades"]]
+
+VALUES['0'] = 0
 
 # Other variables
 go, stop = 0, False
@@ -19,9 +19,11 @@ player, computer = [], []
 
 
 def getCard() -> tuple:
-	toUse_ = random.choice(ALL_CARDS)
+	toUse_ = random.choice(deck)
 	while toUse_ in player or toUse_ in computer:
-		toUse_ = getCard()
+		toUse_ = random.choice(deck)
+
+	deck.remove(toUse_)
 
 	return toUse_
 
@@ -37,9 +39,11 @@ while not stop:
 		goAgain = input("Do you want to keep going (y/n): ")
 		if goAgain.lower() != "y":
 			break
+		else:
+			print("\n--------------- Reset ---------------\n")
 
 	# Game
-	game = True
+	game, deck = True, ALL_CARDS
 	player = [getCard(), getCard()]
 	computer = [getCard(), getCard()]
 	while game:
@@ -57,7 +61,7 @@ while not stop:
 
 		if getSum(player) > 21:
 			print("You're bust")
-			player = [(2, 0)]
+			player = [('0',)]
 			game = False
 
 		# Computer - draws if < 17
@@ -65,12 +69,19 @@ while not stop:
 			computer.append((getCard()))
 
 			if getSum(computer) > 21:
-				computer = [(2, 0)]
+				computer = [('0',)]
 				game = False
 
 	if getSum(player) > getSum(computer):
 		print("Player wins")
 	elif getSum(player) < getSum(computer):
 		print("Computer wins")
+	else:
+		if len(player) > len(computer):
+			print("Player wins - more cards")
+		elif len(computer) > len(player):
+			print("Computer wins - more cards")
+		else:
+			print("Draw")
 
 	go += 1
