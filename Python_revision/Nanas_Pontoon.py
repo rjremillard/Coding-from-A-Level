@@ -65,8 +65,10 @@ while not stop:
 			game = False
 
 		# Computer - draws if < 17
-		if getSum(player) < 17:
-			computer.append((getCard()))
+		if getSum(computer) < 17:
+			toUse = getCard()
+			computer.append(toUse)
+			print("Computer got: %s of %s" % (toUse[0], toUse[1]))
 
 			if getSum(computer) > 21:
 				computer = [('0',)]

@@ -17,7 +17,7 @@ from numpy import arange
 
 
 # Variables & Function that can change
-SET_SIZE, JUMP, LOW, HIGH, STEP, AVG_NUM = 100, 1, 0, 1, .01, 5
+SET_SIZE, JUMP, LOW, HIGH, STEP, AVG_NUM = 500, 1, 0, 1, .01, 5
 HASH = lambda item__, size: (item__ ** 2) % size
 
 
