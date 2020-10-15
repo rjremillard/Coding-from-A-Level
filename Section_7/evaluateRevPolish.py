@@ -9,8 +9,8 @@ stack = []
 
 for n in expr:
 	if n.isnumeric():
-		stack.insert(0, n)
+		stack.append(n)
 	else:
-		stack.insert(0, eval("%s%s%s" % (stack.pop(), n, stack.pop())))
+		stack.append(eval("%s%s%s" % (stack.pop(), n, stack.pop())))
 
 print(stack[0])
