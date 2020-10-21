@@ -1,5 +1,6 @@
 """
 Nicely: inputs, evaluates, and outputs an expression tree in postfix / reverse Polish notation
+Currently only works with depth 2
 """
 
 
@@ -14,14 +15,18 @@ while len([i for i in tree if i in "+-/*"]) != len([i for i in tree if i.isnumer
 
 print(tree)
 
+
 # Make postfix expression
 expr = []
-# Skip root
-for i in range(1, len(tree)):
-	if tree[i].isnumeric() or tree[i-1].isnumeric():
-		expr.append(tree[i])
-		# TODO: Fix
 
-# Add root at end
-expr.append(tree[0])
-print(expr)
+# If "even" tree (both sides end in 2 numbers)
+if not len([i for i in tree if i.isnumeric()]) % 2:
+	for i in range(len(tree)):
+		if tree[i] in "+-*/" and tree[i+1].isnumeric():
+			expr.extend([tree[i+1], tree[i+2], tree[i]])
+
+	# Add root at end
+	expr.append(tree[0])
+	print(expr)
+
+# TODO: Uneven tree
