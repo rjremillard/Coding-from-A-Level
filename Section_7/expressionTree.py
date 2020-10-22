@@ -47,4 +47,4 @@ for i in tree[::-1]:
 # Save postfix
 postfix = "".join(postfixStack)
 
-print(prefix, infix, postfix, sep="\n")
+print("Prefix: %s\nInfix: %s\nPostfix: %s" % (prefix, infix, postfix))
