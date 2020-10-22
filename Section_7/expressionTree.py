@@ -13,20 +13,22 @@ while len([i for i in tree if i in "+-/*"]) != len([i for i in tree if i.isnumer
 	node = input("%s child\n> " % ("Left" if tree[-1] in "+-/*" else "Right"))
 	tree.append(node)
 
-print(tree)
+# Save prefix
+prefix = "".join(tree)
 
+# Make infix expression
+infixStack = tree[::-1]
 
-# Make postfix expression
-expr = []
+for i in tree[::-1]:
+	# If number, push to stack
+	if i.isnumeric():
+		infixStack.insert(0, i)
+	# If operator, sort out
+	else:
+		n0, n1 = infixStack.pop(0), infixStack.pop(0)
+		infixStack.insert(0, "(%s%s%s)" % (n0, i, n1))
 
-# If "even" tree (both sides end in 2 numbers)
-if not len([i for i in tree if i.isnumeric()]) % 2:
-	for i in range(len(tree)):
-		if tree[i] in "+-*/" and tree[i+1].isnumeric():
-			expr.extend([tree[i+1], tree[i+2], tree[i]])
+# Save infix
+infix = infixStack[0]
 
-	# Add root at end
-	expr.append(tree[0])
-	print(expr)
-
-# TODO: Uneven tree
+print(prefix, infix)
