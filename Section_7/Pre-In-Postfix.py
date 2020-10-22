@@ -13,6 +13,9 @@ Two holders:
 	- evaluatePrefix
 	- evaluateInfix
 	- evaluatePostfix
+
+** Notes **
+1. All functions take inputs in space separated form, ie. A + B * C
 """
 
 
@@ -25,12 +28,8 @@ class Stack:
 		self.size = 0
 
 	def pop(self) -> str:
-		if not self.size:
-			raise IndexError("Stack is empty")
-
-		else:
-			self.size -= 1
-			return self.s.pop(0)
+		self.size -= 1
+		return self.s.pop(0)
 
 	def pop2(self) -> list:
 		return [self.pop() for _ in range(2)]
@@ -105,9 +104,16 @@ class Conversions:
 
 class Evaluates:
 	@staticmethod
-	def evaluatePrefix(prefix: str) -> int:
-		# TODO: evaluatePrefix
-		pass
+	def evaluatePrefix(prefix: str) -> str:
+		stack = Stack()
+		for i in prefix[::-1].split():
+			if i.isnumeric():
+				stack.push(i)
+			else:
+				n0, n1 = stack.pop2()
+				stack.push(str(eval(n0+i+n1)))
+
+		return stack.return_()
 
 	@staticmethod
 	def evaluateInfix(infix: str) -> int:
@@ -115,16 +121,26 @@ class Evaluates:
 		pass
 
 	@staticmethod
-	def evaluatePostfix(postfix: str) -> int:
-		# TODO: evaluatePostfix
-		pass
+	def evaluatePostfix(postfix: str) -> str:
+		stack = Stack()
+		for i in postfix.split():
+			if i.isnumeric():
+				stack.push(i)
+			else:
+				n0, n1 = stack.pop2()
+				stack.push(str(eval(n0+i+n1)))
+
+		return stack.return_()
 
 
 # Testcases
 if __name__ == "__main__":
-	print("--\nPrefix: + * 2 4 / 6 3\nTranslated Infix: %s\nTranslated Postfix: %s\nEvaluated: %d\n--"
-							% (Conversions.PrefixToInfix("+ * 2 4 / 6 3"), Conversions.PrefixToPostfix("+ * 2 4 / 6 3"), 0))
-	print("--\nInfix: 2 * (4 + 6) / 3\nTranslated Prefix: %s\nTranslated Postfix: %s\nEvaluated: %d\n--"
-							% ("None", "None", 0))
-	print("--\nPostfix: 2 4 6 3 / + *\nTranslated Prefix: %s\nTranslated Infix: %s\nEvaluated: %d\n--"
-							% (Conversions.PostfixToPrefix("+ * 2 4 / 6 3"), Conversions.PostfixToInfix("+ * 2 4 / 6 3"), 0))
+	print("""
+	--\nPrefix: + * 2 4 / 6 3\nTranslated Infix: %s\nTranslated Postfix: %s\nEvaluated: %s
+	--\nInfix: 2 * (4 + 6) / 3\nTranslated Prefix: %s\nTranslated Postfix: %s\nEvaluated: %s
+	--\nPostfix: 2 4 6 3 / + *\nTranslated Prefix: %s\nTranslated Infix: %s\nEvaluated: %s
+	--""" % (Conversions.PrefixToInfix("+ * 2 4 / 6 3"), Conversions.PrefixToPostfix("+ * 2 4 / 6 3"),
+							Evaluates.evaluatePrefix("+ * 2 4 / 6 3"),
+										"None", "None", "0",
+										Conversions.PostfixToPrefix("+ * 2 4 / 6 3"), Conversions.PostfixToInfix("+ * 2 4 / 6 3"),
+										Evaluates.evaluatePostfix("+ * 2 4 / 6 3")))
