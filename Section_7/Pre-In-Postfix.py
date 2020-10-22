@@ -15,7 +15,7 @@ Two holders:
 	- evaluatePostfix
 
 ** Notes **
-1. All functions take inputs in space separated form, ie. A + B * C
+1. All functions take inputs in space separated form, ie. A + ( B * C )
 """
 
 
@@ -111,14 +111,13 @@ class Evaluates:
 				stack.push(i)
 			else:
 				n0, n1 = stack.pop2()
-				stack.push(str(eval(n0+i+n1)))
+				stack.push(str(eval(n0 + i + n1)))
 
 		return stack.return_()
 
 	@staticmethod
-	def evaluateInfix(infix: str) -> int:
-		# TODO: evaluateInfix
-		pass
+	def evaluateInfix(infix: str) -> str:
+		return str(eval(infix))  # Kinda cheaty but it works
 
 	@staticmethod
 	def evaluatePostfix(postfix: str) -> str:
@@ -128,7 +127,7 @@ class Evaluates:
 				stack.push(i)
 			else:
 				n0, n1 = stack.pop2()
-				stack.push(str(eval(n0+i+n1)))
+				stack.push(str(eval(n1 + i + n0)))
 
 		return stack.return_()
 
@@ -137,10 +136,10 @@ class Evaluates:
 if __name__ == "__main__":
 	print("""
 	--\nPrefix: + * 2 4 / 6 3\nTranslated Infix: %s\nTranslated Postfix: %s\nEvaluated: %s
-	--\nInfix: 2 * (4 + 6) / 3\nTranslated Prefix: %s\nTranslated Postfix: %s\nEvaluated: %s
-	--\nPostfix: 2 4 6 3 / + *\nTranslated Prefix: %s\nTranslated Infix: %s\nEvaluated: %s
+	--\nInfix: ( ( 2 * 4 ) + ( 6 / 3 ) )\nTranslated Prefix: %s\nTranslated Postfix: %s\nEvaluated: %s
+	--\nPostfix: 2 4 * 6 3 / +\nTranslated Prefix: %s\nTranslated Infix: %s\nEvaluated: %s
 	--""" % (Conversions.PrefixToInfix("+ * 2 4 / 6 3"), Conversions.PrefixToPostfix("+ * 2 4 / 6 3"),
 							Evaluates.evaluatePrefix("+ * 2 4 / 6 3"),
-										"None", "None", "0",
-										Conversions.PostfixToPrefix("+ * 2 4 / 6 3"), Conversions.PostfixToInfix("+ * 2 4 / 6 3"),
-										Evaluates.evaluatePostfix("+ * 2 4 / 6 3")))
+										"None", "None", Evaluates.evaluateInfix("( ( 2 * 4 ) + ( 6 / 3 ) )"),
+										Conversions.PostfixToPrefix("2 4 * 6 3 / +"), Conversions.PostfixToInfix("2 4 * 6 3 / +"),
+										Evaluates.evaluatePostfix("2 4 * 6 3 / +")))
