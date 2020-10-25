@@ -9,6 +9,7 @@ Note 1: HTTP aren't counted as they're bad and very uncommon, but mainly because
 """
 
 import re
+import json
 import matplotlib.pyplot as plt
 from urllib.request import urlopen
 from urllib.error import URLError
@@ -59,9 +60,24 @@ url = "https://en.wikipedia.org/wiki/" + input("Url to inspect\n> https://en.wik
 for i in getUrls(url):
 	goThrough(url)
 
+# Saves to json file because I felt like it
+# Overwrites each time
+with open("C@H_3.json", "w") as f:
+	json.dump(store, f)
+
 
 # ----------
 #  Frontend
 # ----------
 
+# init
+fig = plt.figure()
+ax1 = fig.add_subplot()
+
+# plot values
+ax1.bar(["/wiki", "external"], [store["info"]["/wiki"], store["info"]["https"]])
+ax1.set_title("Origin of links from linked webpages from %s" % url)
+
+# show
+plt.show()
 
