@@ -1,56 +1,67 @@
-from urllib.request import urlopen
-from bs4 import BeautifulSoup as Bs
+"""
+Takes a URL as input
+Gets all links from that URL's HTML
+Gets all links from those links' HTML
+
+Warning: takes a long time to run as has to go through a lot of webpages
+Note 0: Probably very inefficient but oh well
+Note 1: HTTP aren't counted as they're bad and very uncommon, but mainly because they're bad
+"""
+
+import re
 import matplotlib.pyplot as plt
+from urllib.request import urlopen
+from urllib.error import URLError
+from bs4 import BeautifulSoup as Bs
+
+
+# ---------
+#  Backend
+# ---------
+
+# Gets urls from webpage
+def getUrls(url_: str) -> list:
+	try:
+		pageObj = urlopen(url_)
+
+	# Bad url
+	except URLError as e:
+		print(e)
+
+	else:
+		# Get "soup" and return all links
+		soup = Bs(pageObj.read(), "html.parser")
+
+		return [i.get("href") for i in soup.find_all("a")]
+
+
+# Adds all actual links to store
+def goThrough(url_: str):
+	for link in getUrls(url_):
+		# Not None
+		if link:
+			# If actual link
+			if link[:5] in ["/wiki", "https"]:
+				# As dicts and lists are global
+				store["info"][link[:5]] += 1
+				store["all links"].append(link)
+
+
+# re
+HREF = re.compile("href=")
+
+store = {"all links": [], "info": {"/wiki": 0, "https": 0}}
 
 # Url to inspect
-url = input("Url to inspect\n> https://en.wikipedia.org/wiki/")
-max = 2
+url = "https://en.wikipedia.org/wiki/" + input("Url to inspect\n> https://en.wikipedia.org/wiki/")
+
+# I tried a recursive program but it was being difficult
+for i in getUrls(url):
+	goThrough(url)
 
 
-# Recursive function to go into links
-def goInto(link: str, n: int) -> dict:
-	# Get a tags and make store dict
-	aTags, store = Bs(urlopen(link).read(), "html.parser").find_all("a"), {"internal": 0, "external": 0, "errors": 0,
-		"links": []}
-
-	print("aTags: %s" % aTags)
-
-	for tag in aTags:
-		link = tag.get("a")
-
-		# If no link
-		if not link:
-			pass
-
-		# If external link
-		elif "http" in link:
-			store["external"] += 1
-
-		# If internal link
-		elif "wiki" in link:
-			store["internal"] += 1
-
-		# Just in case
-		try:
-			store2 = goInto(link, n)
-			# Carry over other scores
-			store["internal"] += store2["internal"]
-			store["external"] += store2["external"]
-			store["errors"] += store2["errors"]
-			store["links"].extend(store2["links"])
-
-		except Exception as e:
-			store["errors"] += 1
-			print(e)
-
-	# Make sure doesn't go too far
-	if n > max:
-		print(store)
-		exit()
-	else:
-		n += 1
-
-	return store
+# ----------
+#  Frontend
+# ----------
 
 
-print(goInto("https://en.wikipedia.org/wiki/" + url, 0))
