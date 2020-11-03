@@ -3,18 +3,14 @@ Converts between two arbitrary bases
 Goes to denary then to wanted base
 """
 
-# Constants
-VALUES = {"A": 10, "B": 11, "C": 12, "D": 13, "E": 14, "F": 15}
-REV_VALUES = {10: "A", 11: "B", 12: "C", 13: "D", 14: "E", 15: "F"}
-
 
 # Functions
 def valueOf(x: str) -> int:
-	return VALUES[x] if x in VALUES else int(x)
+	return ord(x) - 55 if x.isalpha() else int(x)
 
 
 def revValueOf(x: int) -> str:
-	return REV_VALUES[x] if x in REV_VALUES else str(x)
+	return chr(x + 55) if x > 9 else str(x)
 
 
 # Inputs
