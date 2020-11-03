@@ -80,4 +80,3 @@ ax1.set_title("Origin of links from linked webpages from %s" % url)
 
 # show
 plt.show()
-
