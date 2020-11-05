@@ -14,22 +14,17 @@ def revValueOf(x: int) -> str:
 
 
 # Inputs
-oldBase, string, newBase = int(input("Current base: ")), input("String of current number: ")[::-1], \
-	int(input("Desired base: "))
+oldBase, string, newBase = int(input("Current base\n> ")), input("String of current number\n> "), \
+	int(input("Desired base\n> "))
 
 # Get denary
-denary = sum(valueOf(string[i]) * (oldBase ** i) for i in range(len(string)))
-
-# Get max power
-power = 1
-while newBase ** (power - 1) < denary:
-	power += 1
+denary = int(string, oldBase)
 
 # Get new number
 newString = ""
-for i in range(power, -1, -1):
-	newString += revValueOf(denary // newBase ** i)
-	denary %= newBase ** i
+while denary:
+	newString += str(denary % newBase)
+	denary //= newBase
 
 # Output
-print("%s, converted from %d to base %d, is %s" % (string, oldBase, newBase, newString))
+print("%s, converted from base %d to base %d, is %s" % (string, oldBase, newBase, newString[::-1]))
