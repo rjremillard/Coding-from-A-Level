@@ -22,10 +22,8 @@ denary = sum(valueOf(string[i]) * (oldBase ** i) for i in range(len(string)))
 
 # Get max power
 power = 1
-while newBase ** power < denary:
+while newBase ** (power - 1) < denary:
 	power += 1
-
-power -= 1
 
 # Get new number
 newString = ""
