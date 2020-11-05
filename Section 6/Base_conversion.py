@@ -4,12 +4,8 @@ Goes to denary then to wanted base
 """
 
 
-# Functions
-def valueOf(x: str) -> int:
-	return ord(x) - 55 if x.isalpha() else int(x)
-
-
-def revValueOf(x: int) -> str:
+# Function
+def valueOf(x: int) -> str:
 	return chr(x + 55) if x > 9 else str(x)
 
 
@@ -23,7 +19,7 @@ denary = int(string, oldBase)
 # Get new number
 newString = ""
 while denary:
-	newString += str(denary % newBase)
+	newString += valueOf(denary % newBase)
 	denary //= newBase
 
 # Output
