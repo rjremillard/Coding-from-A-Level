@@ -132,19 +132,6 @@ class LinkedList(list):
 	pass
 
 
-class Vertex:
-	__name = 0
-
-	def __init__(self, data: any, adjacency: Dict["Vertex": int]):
-		self.__dict = {"name": Vertex.__name, "data": data, "adjacency": adjacency}
-
-	def __repr__(self):
-		return self.__dict
-
-	def __getitem__(self, item):
-		return self.__dict[item]
-
-
 if __name__ == "__main__":
 	print("\n*** Stack ***\n")
 	stackObj = Stack(size=10)
