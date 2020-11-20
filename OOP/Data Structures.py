@@ -7,9 +7,6 @@ Classes for the following data structures:
 	- Graph
 """
 
-from typing import Dict
-from random import randint, choice
-
 
 class UnderflowError(Exception):
 	pass
@@ -133,7 +130,7 @@ class LinkedList(list):
 
 
 if __name__ == "__main__":
-	print("\n*** Stack ***\n")
+	print("\n*** Stack ***")
 	stackObj = Stack(size=10)
 
 	for a in "abcdefg":
@@ -146,7 +143,7 @@ if __name__ == "__main__":
 
 	print(stackObj)
 
-	print("\n*** LinearQueue ***\n")
+	print("\n*** LinearQueue ***")
 	linearQueueObj = LinearQueue(size=10)
 
 	for a in "abcdefg":
@@ -159,7 +156,7 @@ if __name__ == "__main__":
 
 	print(linearQueueObj)
 
-	print("\n*** CircularQueue ***\n")
+	print("\n*** CircularQueue ***")
 	circularQueueObj = CircularQueue(size=7)
 
 	for a in "abcdefg":
@@ -177,13 +174,13 @@ if __name__ == "__main__":
 
 	print(circularQueueObj)
 
-	print("\n*** Tree ***\n")
+	print("\n*** Tree ***")
 	root = RootNode("a", left=Node(1, right=Node(5)), right=Node("h", left=Node(4)))
 
 	values = root.evaluate()
 	print(values)
 
-	print("\n*** LinkedList ***\n")
+	print("\n*** LinkedList ***")
 	linkedListObj = LinkedList()
 
 	for a in "abcdefg":
