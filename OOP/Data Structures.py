@@ -4,7 +4,6 @@ Classes for the following data structures:
 	- Queue
 	- Tree
 	- Linked list
-	- Graph
 """
 
 
@@ -32,7 +31,7 @@ class Stack:
 			self.__list[self.top] = None
 			self.top -= 1
 			self.size -= 1
-			return item
+			return item if item else "None"
 
 		else:
 			raise UnderflowError("Stack has no items")
