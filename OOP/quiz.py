@@ -29,8 +29,7 @@ score = 1
 for _ in range(int(input("How many questions>\n> "))):
 	questionObj = Question(score)
 	question, answers = questionObj.generate()
-	answer = int(input(f"Question: {question}\nAnswers:\n"
-														+ "\n".join(f"{num + 1}: {answers[num]}" for num in range(4))
+	answer = int(input(f"Question: {question}\nAnswers:\n" + "\n".join(f"{num + 1}: {answers[num]}" for num in range(4))
 														+ "\n> "))
 	if answer == answers.index(questionObj.answer) + 1:
 		print("Correct")
