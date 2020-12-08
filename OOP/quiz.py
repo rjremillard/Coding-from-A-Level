@@ -27,9 +27,10 @@ class Question:
 		_question = f"{num1} {op} {num2}"
 		_answer = eval(_question)
 		_answers = [self.getRandom(num1, num2, op) for _ in range(3)]
+		_answers = list(set(_answers))
 		_answers.append(_answer)
 		random.shuffle(_answers)
-		return _question, _answers, answer
+		return _question, _answers, _answer
 
 	@staticmethod
 	def getRandom(num1: int, num2: int, op: str):
