@@ -156,7 +156,7 @@ gameWin = tkinter.Tk()
 gameWin.title = "Coin Game"
 
 # Labels, Entries, and Buttons
-title = tkinter.Label(master=gameWin, text=".: Dice Game :.", font=FONT12)
+title = tkinter.Label(master=gameWin, text=".: Coin Flip Game :.", font=FONT12)
 title.grid(column=0, row=0, columnspan=4, **PADS)
 
 # Game part
