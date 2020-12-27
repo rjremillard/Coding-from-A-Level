@@ -1,6 +1,8 @@
 """
 Uses a GUI to play a coin flip game
 50/50 chance of either a head or tails
+As both events are mutually exclusive and all flips are independent, we can model the probability of the flips using
+	X ~ B(n, .5), where X is the number of heads and n is the number of flips
 Can: play, make account, see own past results, and see overall stats
 Saves sha256 hash of passwords for security, and records are deleted from RAM after use
 """
@@ -12,7 +14,7 @@ import json
 
 from tkinter import messagebox
 from hashlib import sha256
-from math import gcd
+from math import gcd, factorial
 
 # Constants
 FONT10 = ("Comfortaa", 10)
@@ -176,14 +178,28 @@ def flipper():
 
 	if num:
 		try:
-			# Number stuff
 			num = int(num)
-			rand = random.random()
-			heads = int(num * rand)
+		except ValueError:
+			messagebox.showerror(message="Please only enter a number")
+		# If no error thrown
+		else:
+			# Number stuff
+			results = [random.randint(0, 1) for _ in range(num)]
+			heads = results.count(1)
 			tails = num - heads
 
+			# Fancy number stuff (binomials)
+			# As we can use the distribution X ~ B(n, .5), where X is the number of heads and n is the number of flips,
+			#   we can find the probability of the number of heads through the equation:
+			#       P(X=x) = nCx * .5^x * .5^(n - x), where: n is the number of flips and x is the number of heads
+			#   and we can us the following equation for nCx:
+			#       nCx = n! / x! * (n - x)!
+
+			nCx = factorial(num) / (factorial(heads) * factorial(tails))
+			Px = nCx * pow(.5, heads) * pow(.5, tails)
+
 			# Updates
-			resultsL.config(text=f"Flips: {num}, Heads: {heads}, Tails: {tails}\nRandom number used: {rand}")
+			resultsL.config(text=f"Flips: {num}, Heads: {heads}, Tails: {tails}\nProbability of outcome: {round(Px, 5)}")
 			resultsL.update_idletasks()
 
 			with open("C@H_9.json", "r") as f:
@@ -196,9 +212,6 @@ def flipper():
 				json.dump(records, f)
 
 			del records
-
-		except ValueError:
-			messagebox.showerror(message="Please only enter a number")
 
 	else:
 		messagebox.showerror(message="Please enter a number of flips")
