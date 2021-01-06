@@ -184,9 +184,12 @@ def flipper():
 		# If no error thrown
 		else:
 			# Number stuff
-			results = [random.randint(0, 1) for _ in range(num)]
-			heads = results.count(1)
-			tails = num - heads
+			heads, tails = 0, 0
+			for _ in range(num):
+				if random.randint(0, 1):
+					heads += 1
+				else:
+					tails += 1
 
 			# Fancy number stuff (binomials)
 			# As we can use the distribution X ~ B(n, .5), where X is the number of heads and n is the number of flips,
