@@ -34,6 +34,4 @@ if __name__ == "__main__":
 	for i in [20, 16, 8, 17, 12, 5, 9, 22]:
 		tree.insertNode(i)
 
-	print(f"""
-	{sum(getGreedyPath(tree.head))}
-	""")
+	print(f"""{sum(getGreedyPath(tree.head))}""")
