@@ -22,7 +22,7 @@ class BinaryTree:
 			parent.right = self.TreeNode(data)
 
 
-def getGreedySum(head: BinaryTree.TreeNode):
+def getGreedyPath(head: BinaryTree.TreeNode):
 	while head:
 		yield head.data
 		head = head.right
@@ -34,4 +34,6 @@ if __name__ == "__main__":
 	for i in [20, 16, 8, 17, 12, 5, 9, 22]:
 		tree.insertNode(i)
 
-	print(sum(getGreedySum(tree.head)))
+	print(f"""
+	{sum(getGreedyPath(tree.head))}
+	""")
