@@ -17,7 +17,7 @@ class BinaryTree:
 				head = head.right
 
 		if data < parent.data:
-			parent.left = self.TreeNode(data=data)
+			parent.left = self.TreeNode(data)
 		else:
 			parent.right = self.TreeNode(data)
 
