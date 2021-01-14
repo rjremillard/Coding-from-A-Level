@@ -1,4 +1,4 @@
-from typing import Iterable, List
+from typing import List
 from time import time_ns, sleep
 
 
@@ -24,7 +24,7 @@ def firstFit(arr: List[int], max_: int):
 	return bins[0][1], bins[0][0]
 
 
-def bestFit(arr: Iterable[int], max_: int):
+def bestFit(arr: List[int], max_: int):
 	"""
 	Iterates through the array of weights and fits them into the bin with the least capacity, that would still fit
 	:param arr: Iterable of integers, weights
