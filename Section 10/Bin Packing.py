@@ -21,7 +21,7 @@ def firstFit(arr: List[int], max_: int):
 				break
 
 	bins.sort(reverse=True)
-	return bins[0][1], bins[0][0]
+	return bins[0]
 
 
 def bestFit(arr: List[int], max_: int):
@@ -43,7 +43,7 @@ def bestFit(arr: List[int], max_: int):
 				break
 
 	bins.sort(reverse=True)
-	return bins[0][1], bins[0][0]
+	return bins[0]
 
 
 if __name__ == "__main__":
