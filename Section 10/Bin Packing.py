@@ -50,17 +50,17 @@ if __name__ == "__main__":
 	maximum = int(input("Max Weight: "))
 	weights = list(map(int, input("Space Separated Weights: ").split()))
 
-	# As processing time is very low, have to sleep for .1s, then remove it to see an actual time
+	# As processing time is very low, have to sleep for .1s, then remove it to see an actual time, hence "- 1e8"
 
 	start = time_ns()
 	firstCombo, firstSum = firstFit(weights, maximum)
 	end = time_ns()
-	firstTime = end - start - 1e+8
+	firstTime = end - start - 1e8
 
 	start = time_ns()
 	bestCombo, bestSum = bestFit(weights, maximum)
 	end = time_ns()
-	bestTime = end - start - 1e+8
+	bestTime = end - start - 1e8
 
 	print(f"""
 	Maximum Weight:         {maximum}
