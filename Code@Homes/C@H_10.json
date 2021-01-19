@@ -1,9 +1,11 @@
 {
   "page table": {
-    "A": {"incoming": ["B", "D"], "outbound": 1},
-    "B": {"incoming": ["A"], "outbound": 3},
-    "C": {"incoming": ["B"], "outbound": 0},
-    "D": {"incoming": ["B"], "outbound": 1}
+    "A": {"incoming": ["B", "C", "D", "E"], "outbound": 1},
+    "B": {"incoming": ["D"], "outbound": 1},
+    "C": {"incoming": ["D"], "outbound": 1},
+    "D": {"incoming": ["C"], "outbound": 4},
+    "E": {"incoming": ["F", "D"], "outbound": 1},
+    "F": {"incoming": ["A"], "outbound": 1}
   },
-  "page list": ["A", "B", "C", "D"]
+  "page list": ["A", "B", "C", "D", "E", "F"]
 }

@@ -20,11 +20,6 @@ from matplotlib import pyplot
 # Constants
 DAMPING = 0.85
 
-# Variables
-pageRanks = defaultdict(lambda: 1.00)
-with open("C@H_10.json", "r") as f:
-	pageInfo = json.load(f)
-
 
 # PR function
 def PR(page_name: str) -> float:
@@ -63,19 +58,38 @@ def update(page_list: list) -> list:
 		yield rank
 
 
+# Variables
+pageRanks = defaultdict(lambda: 1.00)
+with open("C@H_10.json", "r") as f:
+	pageInfo = json.load(f)
+iteration = 0
+
 # Main code
 pageTable = pageInfo["page table"]
 pageList = pageInfo["page list"]
+
+# Setup Bars
+fig, ax = pyplot.subplots()
+bars = ax.bar(range(len(pageList)), list(update(pageList)))
+pyplot.ylabel("Rank")
+pyplot.xlabel("Page")
+pyplot.xticks(range(len(pageList)), pageList)
+
+fig.canvas.draw()
 
 while True:
 	goAgain = input("Update page ranks? (Y/n)\n> ").lower()
 
 	if goAgain == "y":
-		chart = pyplot.bar(range(len(pageList)), list(update(pageList)))
-		pyplot.ylabel("Rank")
-		pyplot.xticks(range(len(pageList)), pageList)
+		iteration += 1
+		print(f"Iteration: {iteration}\nExact Values: {' '.join(map(str, pageRanks.values()))}")
+		# Update bars
+		for bar, value in zip(bars, list(update(pageList))):
+			bar.set_height(value)
 
-		pyplot.show()
+		fig.canvas.draw()
+		pyplot.pause(.001)
+
 	else:
 		input("Press any key to exit")
 		exit()
