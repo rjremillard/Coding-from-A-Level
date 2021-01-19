@@ -1,0 +1,9 @@
+{
+  "page table": {
+    "A": {"incoming": ["B", "D"], "outbound": 1},
+    "B": {"incoming": ["A"], "outbound": 3},
+    "C": {"incoming": ["B"], "outbound": 0},
+    "D": {"incoming": ["B"], "outbound": 1}
+  },
+  "page list": ["A", "B", "C", "D"]
+}
