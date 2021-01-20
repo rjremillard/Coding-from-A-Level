@@ -5,10 +5,9 @@ from time import time_ns, sleep
 def firstFit(arr: List[int], max_: int):
 	"""
 	Iterates through the array of weights and fits them into the first bin that fits
-	:param arr: Iterable of integers, weights
+	:param arr: List of integers, weights
 	:param max_: Int, maximum weight of the bin
 	"""
-	sleep(.1)
 
 	bins = [[0, []]]
 	for weight in arr:
@@ -16,34 +15,33 @@ def firstFit(arr: List[int], max_: int):
 			if bin_[0] + weight <= max_:
 				bin_[0] += weight
 				bin_[1].append(weight)
-			else:
-				bins.append([weight, [weight]])
 				break
+		else:
+			bins.append([weight, [weight]])
 
 	bins.sort(reverse=True)
-	return bins[0]
+	return bins
 
 
 def bestFit(arr: List[int], max_: int):
 	"""
 	Iterates through the array of weights and fits them into the bin with the least capacity, that would still fit
-	:param arr: Iterable of integers, weights
+	:param arr: List of integers, weights
 	:param max_: Int, maximum weight of the bin
 	"""
-	sleep(.1)
 
 	bins = [[0, []]]
 	for weight in arr:
-		for bin_ in sorted(bins):
+		for bin_ in sorted(bins, reverse=True):
 			if bin_[0] + weight <= max_:
 				bin_[0] += weight
 				bin_[1].append(weight)
-			else:
-				bins.append([weight, [weight]])
 				break
+		else:
+			bins.append([weight, [weight]])
 
 	bins.sort(reverse=True)
-	return bins[0]
+	return bins
 
 
 if __name__ == "__main__":
@@ -53,12 +51,12 @@ if __name__ == "__main__":
 	# As processing time is very low, have to sleep for .1s, then remove it to see an actual time, hence "- 1e8"
 
 	start = time_ns()
-	firstCombo, firstSum = firstFit(weights, maximum)
+	firstCombo, firstSum = firstFit(weights, maximum)[0]
 	end = time_ns()
 	firstTime = end - start - 1e8
 
 	start = time_ns()
-	bestCombo, bestSum = bestFit(weights, maximum)
+	bestCombo, bestSum = bestFit(weights, maximum)[0]
 	end = time_ns()
 	bestTime = end - start - 1e8
 
