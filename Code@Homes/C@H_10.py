@@ -24,7 +24,7 @@ DAMPING = 0.85
 # PR function
 def PR(page_name: str) -> float:
 	"""
-	Calculates and returns the new rank of `page name`, uses the formula:
+	Calculates and returns the new rank of `page name`, using the formula:
 		PR(A) = (1-d) + d(PR(T1)/C(T1) + ... + PR(Tn)/C(Tn))
 
 	Also saves the new rank to the defaultdict of all ranks
@@ -34,8 +34,8 @@ def PR(page_name: str) -> float:
 	:param page_name: Name of page to calculate and change the rank of
 	:return: The new rank of `page name`
 	"""
-	sum_, current = 0, None
 
+	sum_ = 0
 	# Start summation
 	for page in pageTable[page_name]["incoming"]:
 		sum_ += pageRanks[page] / pageTable[page]["outbound"]
@@ -62,7 +62,6 @@ def update(page_list: list) -> list:
 pageRanks = defaultdict(lambda: 1.00)
 with open("C@H_10.json", "r") as f:
 	pageInfo = json.load(f)
-iteration = 0
 
 # Main code
 pageTable = pageInfo["page table"]
@@ -77,18 +76,23 @@ pyplot.xticks(range(len(pageList)), pageList)
 
 fig.canvas.draw()
 
+iteration = 0
+prevRanks = []
 while True:
 	goAgain = input("Update page ranks? (Y/n)\n> ").lower()
 
 	if goAgain == "y":
-		iteration += 1
-		print(f"Iteration: {iteration}\nExact Values: {' '.join(map(str, pageRanks.values()))}")
-		# Update bars
+		prevRanks.append([])
+		print(f"Iteration: {iteration+1}\nExact Values: {' '.join(map(str, pageRanks.values()))}")
+		# Update bars and ranks
 		for bar, value in zip(bars, list(update(pageList))):
 			bar.set_height(value)
+			prevRanks[iteration].append(value)
 
 		fig.canvas.draw()
 		pyplot.pause(.001)
+
+		iteration += 1
 
 	else:
 		input("Press any key to exit")
