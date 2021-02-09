@@ -35,11 +35,11 @@ GAME_SIZE = (SIZE[0]-20, SIZE[1]-20)
 # Boundary class
 class Boundary:
 	def __init__(self, equation: str, colour: Tuple[int, int, int] = RED):
-		""":param equation: in form y < or > ax + b {c<x<d}{e<y<f}, or x < or > ay  + b {c<x<d}{e<y<f}"""
+		""":param equation: in form y < or > ax + b {c<x<d}, or x < or > ay  + b {c<x<d}"""
 		equation = equation.replace(" ", "")
 
 		reMatch = re.match(
-			r"^([xy])([<>])([+\-.\d]+)([xy])([+\-.\d]+){([+\-.\d]+)<x<([+\-.\d]+)}{([+\-.\d]+)<y<([+\-.\d]+)}$",
+			r"^([xy])([<>])([+\-.\d]+)([xy])([+\-.\d]+){([+\-.\d]+)<x<([+\-.\d]+)}({([+\-.\d]+)<y<([+\-.\d]+)})?$",
 			equation
 		)
 
@@ -51,18 +51,41 @@ class Boundary:
 			self.b = float(reMatch.group(5))
 			c = float(reMatch.group(6))
 			d = float(reMatch.group(7))
-			self.xRange = numpy.arange(c, d)
-			e = float(reMatch.group(8))
-			f = float(reMatch.group(9))
-			self.yRange = numpy.arange(e, f)
+			self.domain = numpy.arange(c, d)
 
-			# For drawing the line
-			if self.xy1 == "y":
-				self.start = self.toInt((c, self.a * c + self.b))
-				self.end = self.toInt((d, self.a * d + self.b))
+			if reMatch.group(8):
+				self.range = numpy.arange(float(reMatch.group(9)), float(reMatch.group(10)))
 			else:
-				self.start = self.toInt((self.a * c + self.b, c))
-				self.end = self.toInt((self.a * d + self.b, d))
+				self.range = numpy.arange(self.domain[0] * self.a + self.b, self.domain[-1] * self.a + self.b)
+
+			if len(self.range) == 0:
+				self.range = [-10, 0]
+
+			# TODO: Make more efficient
+			# For drawing the polygon
+			if self.a == 0:  # If a straight line (box)
+				self.pointList = [
+					(self.domain[0], self.range[0]),  # TL
+					(self.domain[-1], self.range[0]),  # TR
+					(self.domain[-1], self.range[-1]),  # BR
+					(self.domain[0], self.range[-1])  # BL
+				]
+			elif (self.a > 0 and self.xy1 == "y") or (self.a < 0 and self.xy1 == "x"):
+				self.pointList = [
+					(self.domain[0], self.range[0]),  # TL
+					(self.domain[-1], self.range[0]),  # TR
+					(self.domain[-1], self.range[-1])  # BR
+				]
+			elif (self.a < 0 and self.xy1 == "y") or (self.a > 0 and self.xy1 == "x"):
+				self.pointList = [
+					(self.domain[0], self.range[-1]),  # BL
+					(self.domain[-1], self.range[0]),  # TR
+					(self.domain[-1], self.range[-1])  # BR
+				]
+			else:
+				self.pointList = None
+				self.start = self.toInt((self.domain[0], self.a * self.domain[0] + self.b))
+				self.end = self.toInt((self.domain[-1], self.a * self.domain[-1] + self.b))
 
 			self.colour = colour
 		else:
@@ -70,7 +93,7 @@ class Boundary:
 
 	def inBound(self, x: float, y: float) -> bool:
 		"""Calculate if certain coordinates are bound by the inequality"""
-		if x in self.xRange and y in self.yRange and eval(f"{self.xy1} {self.sign} {(self.a * eval(self.xy2)) + self.b}"):
+		if x in self.domain and y in self.range and eval(f"{self.xy1} {self.sign} {(self.a * eval(self.xy2)) + self.b}"):
 			return True
 		return False
 
@@ -79,7 +102,7 @@ class Boundary:
 		return tuple(map(int, a))
 
 
-# Car class
+# Player class
 class Player:
 	def __init__(self, colour: Tuple[int, int, int] = BLACK):
 		self.speeds = [0, 0]
@@ -92,13 +115,13 @@ class Player:
 		yTmp = self.coords[1] + self.speeds[1] + change_y
 
 		# Check boundaries
+		# TODO: Avoid passing as coords are TL
 		for bound in boundaries:
 			if bound.inBound(xTmp, yTmp):
 				self.speeds = [0, 0]
 				break
 		else:  # All is good
 			# Sort speeds
-
 			self.speeds[0] += change_x
 			self.speeds[1] += change_y
 
@@ -113,12 +136,13 @@ clock = pygame.time.Clock()
 
 # Game variables
 BOUNDARIES = [
-	Boundary("y < 0x + 0 {-10000<x<10000}{-1000<y<0}"),  # Bottom
-	Boundary("y > 0x + %d {-10000<x<10000}{%d<y<%d}" % (GAME_SIZE[1], GAME_SIZE[1], GAME_SIZE[1]+1000)),  # Top
-	Boundary("x < 0y + 0 {-1000<x<0}{-10000<y<10000}"),  # Left
-	Boundary("x > 0y + %d {%d<x<%d}{-10000<y<10000}" % (GAME_SIZE[0], GAME_SIZE[0], GAME_SIZE[0]+1000)),  # Right
-	Boundary("y < .25x + 0 {-10000<x<10000}{-10000<y<10000}"),
-	Boundary("y < 0x + 300 {100<x<300}{100<y<300}")
+	Boundary("y < 0x + 0 {0<x<%d}" % GAME_SIZE[0]),  # Top
+	Boundary("y > 0x + %d {0<x<%d}" % (GAME_SIZE[0], GAME_SIZE[0])),  # Bottom
+	Boundary("x < 0y + 0 {-10<x<0}"),  # Left
+	Boundary("x > 0y + %d {%d<x<%d}" % (GAME_SIZE[0], GAME_SIZE[0], GAME_SIZE[0]+10)),  # Right
+	Boundary("y > -.3x + %d {0<x<%d}" % (GAME_SIZE[1], GAME_SIZE[0])),  # Up line test
+	Boundary("y < .25x + 0 {0<x<%d}" % GAME_SIZE[0]),  # Down line test
+	Boundary("y < 0x + 300 {100<x<300}{100<y<300}")  # Box test
 ]
 player = Player()
 
@@ -147,7 +171,11 @@ while not done:
 
 	# Draw boundaries
 	for bound in BOUNDARIES:
-		pygame.draw.line(screen, bound.colour, bound.start, bound.end)
+		# TODO: Draw nicer
+		if bound.pointList:
+			pygame.draw.polygon(screen, bound.colour, bound.pointList)
+		else:
+			pygame.draw.line(screen, bound.colour, bound.start, bound.end, 6)
 
 	# Helpful text
 	speedXText = FONT.render(f"Speed x: {player.speeds[0]}", 0, BLACK)
