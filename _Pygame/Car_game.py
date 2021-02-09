@@ -28,11 +28,6 @@ FPS = 60
 SIZE = (1000, 500)
 
 
-# Custom exception class
-class CustomException(Exception):
-	pass
-
-
 # Boundary class
 class Boundary:
 	def __init__(self, equation: str):
