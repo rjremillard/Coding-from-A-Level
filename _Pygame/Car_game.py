@@ -14,7 +14,7 @@ Controls:
 import pygame
 import numpy
 
-from typing import Tuple
+from typing import Tuple, List
 
 
 # Constants / variables
@@ -25,59 +25,92 @@ RED = (255, 0, 0)
 
 pygame.font.init()
 FONT = pygame.sysfont.SysFont("Comfortaa", 20)
-START_TEXT = "Use WASD to move\nHitting a wall will stop all movement,\nas does the space bar".split("\n")
+START_TEXT = "Use WASD to move and space to stop\nHitting a wall causes death".split("\n")
 
 FPS = 120
 SIZE = (1200, 700)
-GAME_SIZE = (SIZE[0]-20, SIZE[1]-20)
 INF = 10000
+KEY_VALUES = {"w": -.01, "s": .01, "a": -.01, "d": .01}
 
 
 # Boundary class
 class Boundary:
 	def __init__(self, *points: Tuple[int, int], colour: Tuple[int, int, int] = RED):
-		""":param points: 2-dimensional array of coords of 4 vertices"""
+		""":param points: 2-dimensional array of coords of 4 vertices, from TL clockwise"""
+		if len(points) != 4:
+			raise Warning("Boundaries require 4 points to work properly")
+
 		self.pointList = points
-		self.xRange = numpy.arange(points[0][0], points[1][0])
-		self.yRange = numpy.arange(points[0][1], points[2][1])
+		self.xRange = (points[0][0], points[1][0])
+		self.yRange = (points[0][1], points[2][1])
 		self.colour = colour
 
 	def inBound(self, x: float, y: float) -> bool:
-		"""Calculate if certain coordinates are bound by the inequality"""
-		if x in self.xRange and y in self.yRange:
+		"""Calculate if certain coordinates are bound by the rectangle"""
+		if self.xRange[0] < x < self.xRange[1] and self.yRange[0] < y < self.yRange[1]:
 			return True
 		return False
-
-	@staticmethod
-	def toInt(a: Tuple[float, ...]) -> Tuple[int, ...]:
-		return tuple(map(int, a))
 
 
 # Player class
 class Player:
-	def __init__(self, colour: Tuple[int, int, int] = BLACK):
+	def __init__(self, max_speed: int, colour: Tuple[int, int, int] = BLACK):
 		self.speeds = [0, 0]
-		self.coords = [10, 10]
+		self.coords = [20, 20]
+		self.maxSpeed = max_speed
 		self.colour = colour
 
 	def update(self, change_x: int, change_y: int, *boundaries):
-		# Apply changes
-		xTmp = self.coords[0] + self.speeds[0] + change_x
-		yTmp = self.coords[1] + self.speeds[1] + change_y
+		# Sort speeds to be under max
+		self.speeds[0] = round(self.speeds[0] + change_x, 2)
+		if self.speeds[0] > self.maxSpeed:
+			self.speeds[0] = self.maxSpeed
 
-		# Check boundaries
-		# TODO: Avoid passing bounds as coords are TL
-		for bound in boundaries:
-			if bound.inBound(xTmp, yTmp):
+		self.speeds[1] = round(self.speeds[1] + change_y, 2)
+		if self.speeds[1] > self.maxSpeed:
+			self.speeds[1] = self.maxSpeed
+
+		# Apply speeds to coords
+		tmpX = self.coords[0] + self.speeds[0]
+		tmpY = self.coords[1] + self.speeds[1]
+
+		# Check for collisions
+		for boundary in boundaries:
+			if boundary.inBound(tmpX, tmpY):
+				# Collision
 				self.speeds = [0, 0]
 				break
-		else:  # All is good
-			# Sort speeds
-			self.speeds[0] += change_x
-			self.speeds[1] += change_y
+		else:
+			# No collisions
+			self.coords = [round(tmpX, 2), round(tmpY, 2)]
 
-			self.coords[0] = xTmp
-			self.coords[1] = yTmp
+
+class Enemy:
+	def __init__(self, max_speed: int, colour: Tuple[int, int, int] = RED):
+		self.maxSpeed = max_speed
+		self.colour = colour
+		self.coords = [1000, 600]
+
+	def update(self, player_coords: List[int], *boundaries):
+		"""Will move enemy toward player, using a unit vector for the direction"""
+		# TODO: Make avoid boundaries
+		# Calculate vector
+		diffX, diffY = player_coords[0] - self.coords[0], player_coords[1] - self.coords[1]
+		vectorMag = pow(pow(abs(diffX), 2) + pow(abs(diffY), 2), .5)
+		changeX, changeY = (diffX / vectorMag) * self.maxSpeed, (diffY / vectorMag) * self.maxSpeed
+
+		# Apply directions
+		tmpX = self.coords[0] + changeX
+		tmpY = self.coords[1] + changeY
+
+		# Check for collisions
+		for boundary in boundaries:
+			if boundary.inBound(tmpX, tmpY):
+				# Collision
+				break
+		else:
+			# No collisions
+			self.coords = [round(tmpX, 2), round(tmpY, 2)]
 
 
 # Pygame loop
@@ -95,31 +128,45 @@ BOUNDARIES = [
 	Boundary((700, 100), (800, 100), (800, 500), (700, 500)),
 	Boundary((100, 350), (700, 350), (700, 450), (100, 450))
 ]
-player = Player()
+
+player = Player(5)
+enemy = Enemy(1, RED)
 
 done, keypress = False, False
+keysDown = {"w": False, "s": False, "a": False, "d": False}
 while not done:
+	enemyMove = False
 	changeX, changeY = 0, 0
 	for ev in pygame.event.get():
 		if ev.type == pygame.QUIT:  # Quit
 			done = True
 		elif ev.type == pygame.KEYDOWN:  # Keypress
-			keypress = True
-			if ev.key == pygame.K_w:
-				changeY = -1
-			elif ev.key == pygame.K_s:
-				changeY = 1
-			if ev.key == pygame.K_d:
-				changeX = 1
-			elif ev.key == pygame.K_a:
-				changeX = -1
-			elif ev.key == pygame.K_SPACE:
+			keypress, enemyMove = True, True
+			for key in "wasd":
+				if eval(f"ev.key == pygame.K_{key}"):
+					keysDown[key] = True
+			if ev.key == pygame.K_SPACE:
 				player.speeds = [0, 0]
 
+		elif ev.type == pygame.KEYUP:
+			for key in "wasd":
+				if eval(f"ev.key == pygame.K_{key}"):
+					keysDown[key] = False
+
+	for key in "ws":
+		if keysDown[key]:
+			changeY = KEY_VALUES[key]
+
+	for key in "ad":
+		if keysDown[key]:
+			changeX = KEY_VALUES[key]
+
 	player.update(changeX, changeY, *BOUNDARIES)
+	enemy.update(player.coords, *BOUNDARIES)
 
 	screen.fill(GREY)
-	pygame.draw.rect(screen, BLACK, (player.coords[0]-10, player.coords[1]-10, 20, 20))
+	pygame.draw.rect(screen, player.colour, (player.coords[0]-10, player.coords[1]-10, 20, 20))
+	pygame.draw.rect(screen, enemy.colour, (enemy.coords[0]-10, enemy.coords[1]-10, 20, 20))
 
 	# Displaying text
 	if not keypress:
@@ -139,7 +186,6 @@ while not done:
 
 	# Draw boundaries
 	for bound in BOUNDARIES:
-		# TODO: Draw nicer
 		pygame.draw.polygon(screen, bound.colour, bound.pointList)
 
 	# Sort screen
