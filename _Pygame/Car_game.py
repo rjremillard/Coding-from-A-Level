@@ -22,10 +22,13 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (211, 211, 211)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 
 pygame.font.init()
 FONT = pygame.sysfont.SysFont("Comfortaa", 20)
+BIG_FONT = pygame.sysfont.SysFont("Comfortaa", 50)
 START_TEXT = "Use WASD to move and space to stop\nHitting a wall causes death".split("\n")
+DEATH_TEXT = "You have died".split("\n")
 
 FPS = 120
 SIZE = (1200, 700)
@@ -35,7 +38,7 @@ KEY_VALUES = {"w": -.01, "s": .01, "a": -.01, "d": .01}
 
 # Boundary class
 class Boundary:
-	def __init__(self, *points: Tuple[int, int], colour: Tuple[int, int, int] = RED):
+	def __init__(self, *points: Tuple[int, int], colour: Tuple[int, int, int] = BLUE):
 		""":param points: 2-dimensional array of coords of 4 vertices, from TL clockwise"""
 		if len(points) != 4:
 			raise Warning("Boundaries require 4 points to work properly")
@@ -97,7 +100,15 @@ class Enemy:
 		# Calculate vector
 		diffX, diffY = player_coords[0] - self.coords[0], player_coords[1] - self.coords[1]
 		vectorMag = pow(pow(abs(diffX), 2) + pow(abs(diffY), 2), .5)
-		changeX, changeY = (diffX / vectorMag) * self.maxSpeed, (diffY / vectorMag) * self.maxSpeed
+		try:
+			changeX = (diffX / vectorMag) * self.maxSpeed
+		except ZeroDivisionError:
+			changeX = 0
+
+		try:
+			changeY = (diffY / vectorMag) * self.maxSpeed
+		except ZeroDivisionError:
+			changeY = 0
 
 		# Apply directions
 		tmpX = self.coords[0] + changeX
@@ -130,9 +141,9 @@ BOUNDARIES = [
 ]
 
 player = Player(5)
-enemy = Enemy(1, RED)
+enemies = [Enemy(1, RED)]
 
-done, keypress = False, False
+done, keypress, dead = False, False, False
 keysDown = {"w": False, "s": False, "a": False, "d": False}
 while not done:
 	enemyMove = False
@@ -140,33 +151,46 @@ while not done:
 	for ev in pygame.event.get():
 		if ev.type == pygame.QUIT:  # Quit
 			done = True
-		elif ev.type == pygame.KEYDOWN:  # Keypress
-			keypress, enemyMove = True, True
-			for key in "wasd":
-				if eval(f"ev.key == pygame.K_{key}"):
-					keysDown[key] = True
-			if ev.key == pygame.K_SPACE:
+
+		if not dead:
+			if ev.type == pygame.KEYDOWN:  # Keypress
+				keypress, enemyMove = True, True
+				for key in "wasd":
+					if eval(f"ev.key == pygame.K_{key}"):
+						keysDown[key] = True
+				if ev.key == pygame.K_SPACE:
+					player.speeds = [0, 0]
+
+			elif ev.type == pygame.KEYUP:
+				for key in "wasd":
+					if eval(f"ev.key == pygame.K_{key}"):
+						keysDown[key] = False
+
+	if not dead:
+		# Sort key presses
+		for key in "ws":
+			if keysDown[key]:
+				changeY = KEY_VALUES[key]
+
+		for key in "ad":
+			if keysDown[key]:
+				changeX = KEY_VALUES[key]
+
+		screen.fill(GREY)
+
+		# Update player and enemy
+		player.update(changeX, changeY, *BOUNDARIES)
+		pygame.draw.rect(screen, player.colour, (player.coords[0]-10, player.coords[1]-10, 20, 20))
+
+		for enemy in enemies:
+			enemy.update(player.coords, *BOUNDARIES)
+			pygame.draw.rect(screen, enemy.colour, (enemy.coords[0]-10, enemy.coords[1]-10, 20, 20))
+
+			# Check if player has been hit
+			if player.coords[0]-2 < enemy.coords[0] < player.coords[0]+22\
+					and player.coords[1]-2 < enemy.coords[1] < player.coords[1]+22:
+				dead = True
 				player.speeds = [0, 0]
-
-		elif ev.type == pygame.KEYUP:
-			for key in "wasd":
-				if eval(f"ev.key == pygame.K_{key}"):
-					keysDown[key] = False
-
-	for key in "ws":
-		if keysDown[key]:
-			changeY = KEY_VALUES[key]
-
-	for key in "ad":
-		if keysDown[key]:
-			changeX = KEY_VALUES[key]
-
-	player.update(changeX, changeY, *BOUNDARIES)
-	enemy.update(player.coords, *BOUNDARIES)
-
-	screen.fill(GREY)
-	pygame.draw.rect(screen, player.colour, (player.coords[0]-10, player.coords[1]-10, 20, 20))
-	pygame.draw.rect(screen, enemy.colour, (enemy.coords[0]-10, enemy.coords[1]-10, 20, 20))
 
 	# Displaying text
 	if not keypress:
@@ -187,6 +211,11 @@ while not done:
 	# Draw boundaries
 	for bound in BOUNDARIES:
 		pygame.draw.polygon(screen, bound.colour, bound.pointList)
+
+	# Draw death text now (over boundaries)
+	if dead:
+		line = BIG_FONT.render("You have died", -10, BLACK)
+		screen.blit(line, (SIZE[0]/2 - 60, SIZE[1]/2 - 20))
 
 	# Sort screen
 	pygame.display.flip()
