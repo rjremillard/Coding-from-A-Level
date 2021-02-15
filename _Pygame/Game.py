@@ -13,6 +13,8 @@ Controls:
 # Imports
 import pygame
 import random
+import json
+import time
 
 from typing import Tuple, List
 
@@ -24,6 +26,7 @@ WHITE = (255, 255, 255)
 GREY = (211, 211, 211)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
 
 # Text
 pygame.font.init()
@@ -36,7 +39,7 @@ DEATH_TEXT = "You have died".split("\n")
 FPS = 120
 SIZE = (1200, 700)
 INF = 10000
-KEY_VALUES = {pygame.K_w: (0, -.01), pygame.K_s: (0, .01), pygame.K_a: (-.01, 0), pygame.K_d: (.01, 0)}
+KEY_VALUES = {pygame.K_w: (0, -.02), pygame.K_s: (0, .02), pygame.K_a: (-.02, 0), pygame.K_d: (.02, 0)}
 
 
 # Boundary class
@@ -51,11 +54,9 @@ class Boundary:
 		self.yRange = (points[0][1], points[2][1])
 		self.colour = colour
 
-	def inBound(self, x: float, y: float) -> bool:
+	def inBound(self, x: float, y: float):
 		"""Calculate if certain coordinates are bound by the rectangle"""
-		if self.xRange[0] < x < self.xRange[1] and self.yRange[0] < y < self.yRange[1]:
-			return True
-		return False
+		return [self.xRange[0] < x < self.xRange[1], self.yRange[0] < y < self.yRange[1]]
 
 
 # Player class
@@ -65,15 +66,20 @@ class Player:
 		self.coords = [20, 20]
 		self.maxSpeed = max_speed
 		self.colour = colour
-		self.hit = False
+		self.effect = [None, None]
 
 	def update(self, change_x: int, change_y: int, *boundaries):
+		# Check if effected
+		if self.effect[0] == "speed":
+			mult = 1.01
+		else:
+			mult = 1
 		# Sort speeds to be under max, keep to 2 dp
-		self.speeds[0] = round(self.speeds[0] + change_x, 2)
+		self.speeds[0] = round((self.speeds[0] + change_x) * mult, 2)
 		if self.speeds[0] > self.maxSpeed:
 			self.speeds[0] = self.maxSpeed
 
-		self.speeds[1] = round(self.speeds[1] + change_y, 2)
+		self.speeds[1] = round((self.speeds[1] + change_y) * mult, 2)
 		if self.speeds[1] > self.maxSpeed:
 			self.speeds[1] = self.maxSpeed
 
@@ -83,9 +89,12 @@ class Player:
 
 		# Check for collisions
 		for boundary in boundaries:
-			if boundary.inBound(tmpX, tmpY):
-				# Collision
-				self.speeds = [0, 0]
+			collisions = boundary.inBound(tmpX, tmpY)
+			if all(collisions):
+				if collisions[0]:
+					self.speeds[0] = 0
+				if collisions[1]:
+					self.speeds[1] = 0
 				break
 		else:
 			# No collisions
@@ -126,12 +135,25 @@ class Enemy:
 
 		# Check for collisions
 		for boundary in boundaries:
-			if boundary.inBound(tmpX, tmpY):
+			if all(boundary.inBound(tmpX, tmpY)):
 				# Collision
 				break
 		else:
 			# No collisions
 			self.coords = [round(tmpX, 2), round(tmpY, 2)]
+
+
+class Collectable:
+	def __init__(self, type_: str, duration: float, coords: Tuple[int, int], colour: Tuple[int, ...] = GREEN):
+		"""
+		:param type_: can be one of speed or health
+		:param duration: is to be given in seconds
+		"""
+		self.coords = coords
+		self.type = type_
+		self.duration = duration * FPS
+		self.colour = colour
+		self.alive = True
 
 
 # Pygame setup
@@ -150,15 +172,16 @@ BOUNDARIES = [
 	Boundary((100, 350), (700, 350), (700, 450), (100, 450))
 ]
 
-# Player and enemies
-player = Player(5)
-enemies = [Enemy(1, RED), Enemy(1.5, RED), Enemy(1.3, RED)]
+# Player, enemies, and collectables
+player = Player(3)
+enemies = [Enemy(1, RED), Enemy(1.2, RED), Enemy(1.3, RED)]
 touches = [0 for _ in range(len(enemies))]
+collectables = [Collectable("speed", 6, (650, 200)), Collectable("health", 10, (100, 600))]
 
 # Game variables
-done, keypress, dead = False, False, False
+done, keypress, dead, scoreSaved = False, False, False, False
 keysDown = {pygame.K_w: False, pygame.K_s: False, pygame.K_a: False, pygame.K_d: False}
-aliveTime = 0
+aliveTime, effects = 0, 0
 while not done:
 	directions = [0, 0]
 	for ev in pygame.event.get():
@@ -170,7 +193,7 @@ while not done:
 			if ev.type == pygame.KEYDOWN:
 				if ev.key in keysDown:
 					# Enemy moves when you do
-					keypress= True
+					keypress = True
 					# Set key to pressed
 					keysDown[ev.key] = True
 					# Sort space
@@ -195,12 +218,14 @@ while not done:
 		# Clean screen to draw
 		screen.fill(GREY)
 
-		# Update player and enemies
+		# Update player
 		player.update(*directions, *BOUNDARIES)
 		pygame.draw.rect(screen, player.colour, (player.coords[0]-10, player.coords[1]-10, 20, 20))
 
+		# Update enemies
 		for enemy in enemies:
-			if any(keysDown.values()):
+			# If we move, enemies move
+			if any(player.speeds):
 				enemy.update(player.coords, *BOUNDARIES)
 			pygame.draw.rect(screen, enemy.colour, (enemy.coords[0]-10, enemy.coords[1]-10, 20, 20))
 
@@ -210,6 +235,23 @@ while not done:
 				touches[enemy.number] += 1
 			else:
 				touches[enemy.number] = 0
+
+		# Update collectables
+		for coll in collectables:
+			if coll.alive:
+				pygame.draw.rect(screen, coll.colour, (coll.coords[0]-5, coll.coords[1]-5, 10, 10))
+				if player.coords[0]-2 < coll.coords[0] < player.coords[0]+22\
+					and player.coords[1]-2 < coll.coords[1] < player.coords[1]+22:
+					coll.alive = False
+					player.effect = [coll.type, coll.duration]
+					effects += 1
+
+		# Check effects
+		if player.effect != [None, None]:
+			if player.effect[1] <= 0:
+				player.effect = [None, None]
+			else:
+				player.effect[1] -= 1
 
 	# Displaying text
 	if not keypress:
@@ -228,22 +270,50 @@ while not done:
 		screen.blit(coordsText, (10, 34))
 
 		# Death timer
-		deathText = FONT.render(f"Death timer: {round(max(touches)/FPS, 2)}s", 3, BLACK)
+		deathText = FONT.render(
+			f"Death timer: {round(max(touches)/FPS, 2)}s of {2 if player.effect[0] == 'health' else 1}s", 3, BLACK)
 		screen.blit(deathText, (10, 46))
 
 		# Alive timer
 		aliveText = FONT.render(f"Alive timer: {round(aliveTime/FPS, 2)}s", 4, BLACK)
 		screen.blit(aliveText, (10, 58))
 
+		# Effects
+		effectText0 = FONT.render(f"Effect: {player.effect[0]}", 5, BLACK)
+		effectText1 = FONT.render(f"Time left: {player.effect[1]}", 6, BLACK)
+
+		screen.blit(effectText0, (10, 78))
+		screen.blit(effectText1, (10, 90))
+
 	# Draw boundaries
 	for bound in BOUNDARIES:
 		pygame.draw.polygon(screen, bound.colour, bound.pointList)
 
 	# Draw death text now (over boundaries), die after one second of touch
-	if max(touches) >= FPS:
+	if max(touches) >= (FPS * (2 if player.effect[0] == "health" else 1)):
+		if not scoreSaved:
+			# Take name input from user
+			name = ""
+
+			# Save score with username
+			with open("game_scores.json", "r") as f:
+				pastScores = json.load(f)
+
+			pastScores.append([list(time.gmtime()), aliveTime / (len(collectables) - effects + 1)])
+			with open("game_scores.json", "w") as f:
+				json.dump(pastScores, f)
+
+			scoreSaved = True
+
+		# Other dead stuff
 		dead = True
-		line = BIG_FONT.render("You have died", -10, BLACK)
-		screen.blit(line, (SIZE[0]/2 - 60, SIZE[1]/2 - 20))
+		death0 = BIG_FONT.render("You have died", -10, BLACK)
+		death1 = FONT.render(f"Score: {aliveTime / (len(collectables) - effects + 1)}", -11, BLACK)
+		death2 = FONT.render(f"Highscore: {max(pastScores, key=lambda x: x[1])[1]}", -12, BLACK)
+
+		screen.blit(death0, (SIZE[0]/2 - 60, SIZE[1]/2 - 20))
+		screen.blit(death1, (SIZE[0]/2 - 55, SIZE[1]/2 + 10))
+		screen.blit(death2, (SIZE[0]/2 - 55, SIZE[1]/2 + 22))
 
 	# Sort screen
 	pygame.display.flip()
