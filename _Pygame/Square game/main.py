@@ -16,144 +16,13 @@ import random
 import json
 import time
 
-from typing import Tuple, List
+from game_objects import *
+from game_constants import *
 
 
-# Constants / variables
-# Colours
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-GREY = (211, 211, 211)
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
-GREEN = (0, 255, 0)
-
-# Text
-pygame.font.init()
-FONT = pygame.sysfont.SysFont("Comfortaa", 20)
-BIG_FONT = pygame.sysfont.SysFont("Comfortaa", 50)
-START_TEXT = "Use WASD to move and space to stop\nHitting a wall causes death".split("\n")
-DEATH_TEXT = "You have died".split("\n")
-
-# Game controls
-FPS = 120
-SIZE = (1200, 700)
-INF = 10000
-KEY_VALUES = {pygame.K_w: (0, -.02), pygame.K_s: (0, .02), pygame.K_a: (-.02, 0), pygame.K_d: (.02, 0)}
-
-
-# Boundary class
-class Boundary:
-	def __init__(self, *points: Tuple[int, int], colour: Tuple[int, int, int] = BLUE):
-		""":param points: 2-dimensional array of coords of 4 vertices, from TL clockwise"""
-		if len(points) != 4:
-			raise Warning("Boundaries require 4 points to work properly")
-
-		self.pointList = points
-		self.xRange = (points[0][0], points[1][0])
-		self.yRange = (points[0][1], points[2][1])
-		self.colour = colour
-
-	def inBound(self, x: float, y: float):
-		"""Calculate if certain coordinates are bound by the rectangle"""
-		return [self.xRange[0] < x < self.xRange[1], self.yRange[0] < y < self.yRange[1]]
-
-
-# Player class
-class Player:
-	def __init__(self, max_speed: float, colour: Tuple[int, int, int] = BLACK):
-		self.speeds = [0, 0]
-		self.coords = [20, 20]
-		self.maxSpeed = max_speed
-		self.colour = colour
-		self.effect = [None, None]
-
-	def update(self, change_x: int, change_y: int, *boundaries):
-		# Check if effected
-		if self.effect[0] == "speed":
-			mult = 1.01
-		else:
-			mult = 1
-		# Sort speeds to be under max, keep to 2 dp
-		self.speeds[0] = round((self.speeds[0] + change_x) * mult, 2)
-		if self.speeds[0] > self.maxSpeed:
-			self.speeds[0] = self.maxSpeed
-
-		self.speeds[1] = round((self.speeds[1] + change_y) * mult, 2)
-		if self.speeds[1] > self.maxSpeed:
-			self.speeds[1] = self.maxSpeed
-
-		# Apply speeds to coords
-		tmpX = self.coords[0] + self.speeds[0]
-		tmpY = self.coords[1] + self.speeds[1]
-
-		# Check for collisions
-		for boundary in boundaries:
-			collisions = boundary.inBound(tmpX, tmpY)
-			if all(collisions):
-				if collisions[0]:
-					self.speeds[0] = 0
-				if collisions[1]:
-					self.speeds[1] = 0
-				break
-		else:
-			# No collisions
-			self.coords = [round(tmpX, 2), round(tmpY, 2)]
-
-
-class Enemy:
-	enemyNum = 0
-
-	def __init__(self, max_speed: float, colour: Tuple[int, int, int] = RED):
-		self.maxSpeed = max_speed
-		self.colour = colour
-		self.coords = [1000, 600]
-		self.number = Enemy.enemyNum
-		Enemy.enemyNum += 1
-
-	def update(self, player_coords: List[int], *boundaries):
-		"""Will move enemy toward player, using a unit vector for the direction. Adds in some random variation too"""
-		# TODO: Make avoid boundaries
-		# Calculate differences in coords
-		diffX, diffY = player_coords[0] - self.coords[0], player_coords[1] - self.coords[1]
-		# Calculate magnitude of vector
-		vectorMag = pow(pow(abs(diffX), 2) + pow(abs(diffY), 2), .5)
-		# Apply magnitude to create unit vector
-		try:
-			changeX = (diffX / vectorMag) * self.maxSpeed * random.uniform(.5, 1.5)
-		except ZeroDivisionError:
-			changeX = 0
-
-		try:
-			changeY = (diffY / vectorMag) * self.maxSpeed * random.uniform(.5, 1.5)
-		except ZeroDivisionError:
-			changeY = 0
-
-		# Apply directions
-		tmpX = self.coords[0] + changeX
-		tmpY = self.coords[1] + changeY
-
-		# Check for collisions
-		for boundary in boundaries:
-			if all(boundary.inBound(tmpX, tmpY)):
-				# Collision
-				break
-		else:
-			# No collisions
-			self.coords = [round(tmpX, 2), round(tmpY, 2)]
-
-
-class Collectable:
-	def __init__(self, type_: str, duration: float, coords: Tuple[int, int], colour: Tuple[int, ...] = GREEN):
-		"""
-		:param type_: can be one of speed or health
-		:param duration: is to be given in seconds
-		"""
-		self.coords = coords
-		self.type = type_
-		self.duration = duration * FPS
-		self.colour = colour
-		self.alive = True
+# Handy function
+def isHit(player_x: int, player_y: int, other_x: int, other_y: int) -> bool:
+	return player_x - 2 < other_x < player_x + 22 and player_y - 2 < other_y < player_y + 22
 
 
 # Pygame setup
@@ -230,8 +99,7 @@ while not done:
 			pygame.draw.rect(screen, enemy.colour, (enemy.coords[0]-10, enemy.coords[1]-10, 20, 20))
 
 			# Check if player has been hit
-			if player.coords[0]-2 < enemy.coords[0] < player.coords[0]+22\
-					and player.coords[1]-2 < enemy.coords[1] < player.coords[1]+22:
+			if isHit(*player.coords, *enemy.coords):
 				touches[enemy.number] += 1
 			else:
 				touches[enemy.number] = 0
@@ -240,18 +108,10 @@ while not done:
 		for coll in collectables:
 			if coll.alive:
 				pygame.draw.rect(screen, coll.colour, (coll.coords[0]-5, coll.coords[1]-5, 10, 10))
-				if player.coords[0]-2 < coll.coords[0] < player.coords[0]+22\
-					and player.coords[1]-2 < coll.coords[1] < player.coords[1]+22:
+				if isHit(*player.coords, *coll.coords):
 					coll.alive = False
 					player.effect = [coll.type, coll.duration]
 					effects += 1
-
-		# Check effects
-		if player.effect != [None, None]:
-			if player.effect[1] <= 0:
-				player.effect = [None, None]
-			else:
-				player.effect[1] -= 1
 
 	# Displaying text
 	if not keypress:
@@ -289,18 +149,18 @@ while not done:
 	for bound in BOUNDARIES:
 		pygame.draw.polygon(screen, bound.colour, bound.pointList)
 
-	# Draw death text now (over boundaries), die after one second of touch
+	# Deal with death
 	if max(touches) >= (FPS * (2 if player.effect[0] == "health" else 1)):
 		if not scoreSaved:
 			# Take name input from user
 			name = ""
 
 			# Save score with username
-			with open("game_scores.json", "r") as f:
+			with open("scores.json", "r") as f:
 				pastScores = json.load(f)
 
 			pastScores.append([list(time.gmtime()), aliveTime / (len(collectables) - effects + 1)])
-			with open("game_scores.json", "w") as f:
+			with open("scores.json", "w") as f:
 				json.dump(pastScores, f)
 
 			scoreSaved = True
