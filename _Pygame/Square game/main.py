@@ -21,8 +21,8 @@ from game_constants import *
 
 
 # Handy function
-def isHit(player_x: int, player_y: int, other_x: int, other_y: int) -> bool:
-	return player_x - 2 < other_x < player_x + 22 and player_y - 2 < other_y < player_y + 22
+def isHit(player_x: int, player_y: int, other_x: int, other_y: int, pad: int = 2) -> bool:
+	return player_x - pad < other_x < player_x + 20 + pad and player_y - pad < other_y < player_y + 20 + pad
 
 
 # Pygame setup
@@ -48,9 +48,10 @@ touches = [0 for _ in range(len(enemies))]
 collectables = [Collectable("speed", 6, (650, 200)), Collectable("health", 10, (100, 600))]
 
 # Game variables
-done, keypress, dead, scoreSaved = False, False, False, False
+done, keypress, dead, scoreSaved, nameGot = False, False, False, False, False
 keysDown = {pygame.K_w: False, pygame.K_s: False, pygame.K_a: False, pygame.K_d: False}
 aliveTime, effects = 0, 0
+name = ""
 while not done:
 	directions = [0, 0]
 	for ev in pygame.event.get():
@@ -73,6 +74,17 @@ while not done:
 				if ev.key in keysDown:
 					# Key no longer pressed
 					keysDown[ev.key] = False
+
+		# Dead so getting name from user
+		elif dead and not nameGot:
+			if ev.type == pygame.KEYDOWN:
+				# Special case keys
+				if ev.unicode == "\r":
+					nameGot = True
+				elif ev.unicode == "\b":
+					name = name[:-1]
+				else:
+					name += ev.unicode
 
 	if not dead:
 		# Add to alive time
@@ -99,7 +111,7 @@ while not done:
 			pygame.draw.rect(screen, enemy.colour, (enemy.coords[0]-10, enemy.coords[1]-10, 20, 20))
 
 			# Check if player has been hit
-			if isHit(*player.coords, *enemy.coords):
+			if isHit(*player.coords, *enemy.coords, pad=10):
 				touches[enemy.number] += 1
 			else:
 				touches[enemy.number] = 0
@@ -150,30 +162,34 @@ while not done:
 		pygame.draw.polygon(screen, bound.colour, bound.pointList)
 
 	# Deal with death
-	if max(touches) >= (FPS * (2 if player.effect[0] == "health" else 1)):
-		if not scoreSaved:
-			# Take name input from user
-			name = ""
-
-			# Save score with username
-			with open("scores.json", "r") as f:
-				pastScores = json.load(f)
-
-			pastScores.append([list(time.gmtime()), aliveTime / (len(collectables) - effects + 1)])
-			with open("scores.json", "w") as f:
-				json.dump(pastScores, f)
-
-			scoreSaved = True
-
-		# Other dead stuff
+	if max(touches) >= (FPS * (2 if player.effect[0] == "health" else 1)) or dead:
 		dead = True
-		death0 = BIG_FONT.render("You have died", -10, BLACK)
-		death1 = FONT.render(f"Score: {aliveTime / (len(collectables) - effects + 1)}", -11, BLACK)
-		death2 = FONT.render(f"Highscore: {max(pastScores, key=lambda x: x[1])[1]}", -12, BLACK)
+		# Draw name to see progress
+		nameText = FONT.render(f"Name: {name}", 100, BLACK)
+		screen.blit(nameText, (SIZE[0]/2 - 55, SIZE[1]/2 + 34))
 
+		if nameGot:
+			# Save score with username
+			if not scoreSaved:
+				with open("scores.json", "r") as f:
+					pastScores = json.load(f)
+
+				pastScores.append([name, aliveTime])
+				with open("scores.json", "w") as f:
+					json.dump(pastScores, f)
+
+				scoreSaved = True
+
+			death1 = FONT.render(f"Score: {aliveTime}", -11, BLACK)
+			highScore = max(pastScores, key=lambda x: x[1])
+			death2 = FONT.render(f"Highscore: {highScore[0]}, lasting {highScore[1]}s", -12, BLACK)
+
+			screen.blit(death1, (SIZE[0] / 2 - 55, SIZE[1] / 2 + 10))
+			screen.blit(death2, (SIZE[0] / 2 - 55, SIZE[1] / 2 + 22))
+
+		# Main death message
+		death0 = BIG_FONT.render("You have died", -10, BLACK)
 		screen.blit(death0, (SIZE[0]/2 - 60, SIZE[1]/2 - 20))
-		screen.blit(death1, (SIZE[0]/2 - 55, SIZE[1]/2 + 10))
-		screen.blit(death2, (SIZE[0]/2 - 55, SIZE[1]/2 + 22))
 
 	# Sort screen
 	pygame.display.flip()
