@@ -1,3 +1,5 @@
+"""Classes for game objects used in main.py"""
+
 import random
 
 from typing import Tuple, List
@@ -73,7 +75,7 @@ class Enemy:
 	def __init__(self, max_speed: float, colour: Tuple[int, int, int] = RED):
 		self.maxSpeed = max_speed
 		self.colour = colour
-		self.coords = [1000, 600]
+		self.coords = [SIZE[0]-10, SIZE[1]-10]
 		self.number = Enemy.enemyNum
 		Enemy.enemyNum += 1
 

@@ -1,6 +1,9 @@
 """
 Game involving controlling a player and avoiding a number of enemies
 
+To change aspects of the game, consult game_constants.py
+Classes for game objects can be found at game_objects.py
+
 Controls:
 	- W = Up
 	- S = Down
@@ -14,7 +17,6 @@ Controls:
 import pygame
 import random
 import json
-import time
 
 from game_objects import *
 from game_constants import *
@@ -36,10 +38,18 @@ BOUNDARIES = [
 	Boundary((-10, SIZE[1]), (SIZE[0]+10, SIZE[1]), (SIZE[0]+10, SIZE[1]+INF), (-10, SIZE[1]+INF)),  # Bottom
 	Boundary((SIZE[0]-INF, -10), (0, -10), (0, SIZE[1]+10), (SIZE[0]-INF, SIZE[1]+10)),  # Left
 	Boundary((SIZE[0], -10), (SIZE[0]+INF, -10), (SIZE[0]+INF, SIZE[1]+10), (SIZE[0], SIZE[1]+10)),  # Right
-	Boundary((100, 300), (300, 300), (300, 500), (100, 500)),
-	Boundary((700, 100), (800, 100), (800, 500), (700, 500)),
-	Boundary((100, 350), (700, 350), (700, 450), (100, 450))
 ]
+
+# Generate random boundaries
+for _ in range(BOUNDS_NUM):
+	# Generate vertices
+	# Don't allow to spawn on player or enemies
+	topLeft = (random.randint(10, SIZE[0]-10), random.randint(10, SIZE[1]-10))
+	topRight = (random.randint(topLeft[0], SIZE[0]-10), topLeft[1])
+	bottomLeft = (topLeft[0], random.randint(topLeft[1], SIZE[1]-10))
+	bottomRight = (topRight[0], bottomLeft[1])
+
+	BOUNDARIES.append(Boundary(topLeft, topRight, bottomRight, bottomLeft))
 
 # Player, enemies, and collectables
 player = Player(3)
@@ -174,13 +184,13 @@ while not done:
 				with open("scores.json", "r") as f:
 					pastScores = json.load(f)
 
-				pastScores.append([name, aliveTime])
+				pastScores.append([name, round(aliveTime/FPS, 2)])
 				with open("scores.json", "w") as f:
 					json.dump(pastScores, f)
 
 				scoreSaved = True
 
-			death1 = FONT.render(f"Score: {aliveTime}", -11, BLACK)
+			death1 = FONT.render(f"Score: {round(aliveTime/FPS, 2)}", -11, BLACK)
 			highScore = max(pastScores, key=lambda x: x[1])
 			death2 = FONT.render(f"Highscore: {highScore[0]}, lasting {highScore[1]}s", -12, BLACK)
 
