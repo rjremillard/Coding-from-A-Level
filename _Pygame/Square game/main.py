@@ -43,10 +43,10 @@ BOUNDARIES = [
 # Generate random boundaries
 for _ in range(BOUNDS_NUM):
 	# Generate vertices
-	# Don't allow to spawn on player or enemies
+	# Don't allow to spawn on player or enemies. Also, allows for movement on edges
 	topLeft = (random.randint(10, SIZE[0]-10), random.randint(10, SIZE[1]-10))
-	topRight = (random.randint(topLeft[0], SIZE[0]-10), topLeft[1])
-	bottomLeft = (topLeft[0], random.randint(topLeft[1], SIZE[1]-10))
+	topRight = (random.randint(topLeft[0]+10, SIZE[0]-10), topLeft[1])
+	bottomLeft = (topLeft[0], random.randint(topLeft[1]+10, SIZE[1]-10))
 	bottomRight = (topRight[0], bottomLeft[1])
 
 	BOUNDARIES.append(Boundary(topLeft, topRight, bottomRight, bottomLeft))

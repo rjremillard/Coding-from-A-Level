@@ -18,9 +18,9 @@ class Boundary:
 		self.yRange = (points[0][1], points[2][1])
 		self.colour = colour
 
-	def inBound(self, x: float, y: float):
+	def inBound(self, x: float, y: float) -> bool:
 		"""Calculate if certain coordinates are bound by the rectangle"""
-		return [self.xRange[0] < x < self.xRange[1], self.yRange[0] < y < self.yRange[1]]
+		return self.xRange[0] < x < self.xRange[1] and self.yRange[0] < y < self.yRange[1]
 
 
 # Player class
@@ -54,7 +54,7 @@ class Player:
 
 		# Check for collisions
 		for boundary in boundaries:
-			if all(boundary.inBound(tmpX, tmpY)):
+			if boundary.inBound(tmpX, tmpY):
 				self.speeds = [0, 0]
 				break
 		else:
@@ -76,6 +76,7 @@ class Enemy:
 		self.maxSpeed = max_speed
 		self.colour = colour
 		self.coords = [SIZE[0]-10, SIZE[1]-10]
+		self.pastHits = [False, False, False]
 		self.number = Enemy.enemyNum
 		Enemy.enemyNum += 1
 
@@ -96,18 +97,28 @@ class Enemy:
 		except ZeroDivisionError:
 			changeY = 0
 
+		# If collided thrice, go back
+		if all(self.pastHits):
+			changeX *= -1
+			changeY *= -1
+
 		# Apply directions
 		tmpX = self.coords[0] + changeX
 		tmpY = self.coords[1] + changeY
 
+		hit = False
 		# Check for collisions
 		for boundary in boundaries:
-			if all(boundary.inBound(tmpX, tmpY)):
+			if boundary.inBound(tmpX, tmpY):
 				# Collision
+				hit = True
 				break
+		# No collisions
 		else:
-			# No collisions
 			self.coords = [round(tmpX, 2), round(tmpY, 2)]
+
+		# Update past collisions
+		self.pastHits = self.pastHits[1:3] + [hit]
 
 
 class Collectable:

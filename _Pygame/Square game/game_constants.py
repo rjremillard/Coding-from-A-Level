@@ -22,6 +22,7 @@ FPS = 120  # Game ticks per second
 SIZE = (1200, 700)  # Size of the game screen
 INF = 10000  # A large number to act as infinity
 BOUNDS_NUM = 6  # Number of randomly generated Boundaries
+BOUND_MIN_SIZE = 10  # Minimum width and height of the boundaries
 
 # Acceleration vectors per key
 KEY_VALUES = {pygame.K_w: (0, -.02), pygame.K_s: (0, .02), pygame.K_a: (-.02, 0), pygame.K_d: (.02, 0)}
