@@ -1,4 +1,4 @@
-"""Classes for game objects used in main.py"""
+"""Classes for game objects used in frontend.py"""
 
 import random
 

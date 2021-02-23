@@ -1,4 +1,4 @@
-"""Constants for use in main.py"""
+"""Constants for use in frontend.py"""
 
 import pygame
 
