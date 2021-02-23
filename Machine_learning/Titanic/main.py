@@ -2,12 +2,25 @@
 
 import pandas
 import numpy as np
+import re
+
+from collections import defaultdict
 
 # Get data
 DATA = pandas.read_csv("train.csv")
 # Removing unneeded columns and empty boxes
-for i in ["Name", "Ticket", "Cabin"]:
+for i in ["Ticket", "Cabin"]:
 	del DATA[i]
+
+
+# Set names to titles, use regex
+def getTitle(name: str) -> str:
+	# All titles in the file
+	search = re.search(r"(\w+(?=\.))", name)
+	return search.group()
+
+
+DATA["Name"] = DATA["Name"].apply(getTitle)
 
 # Give default age
 DATA["Age"] = DATA["Age"].apply(lambda x: 30 if x == np.NAN else x)
@@ -23,6 +36,14 @@ for i in maps.keys():
 # Get averages for each header
 AVERAGES = {}
 for column in DATA.columns:
-	AVERAGES[column] = DATA[column].mean()
+	if column == "Name":
+		# Most common as is qualitative
+		AVERAGES[column] = DATA[column].mode().values[0]
+	else:
+		AVERAGES[column] = DATA[column].mean()
 
 print(AVERAGES)
+
+weights = defaultdict(lambda: 0)
+# Iterate through rows and update weights
+
