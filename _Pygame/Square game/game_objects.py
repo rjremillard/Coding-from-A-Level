@@ -76,13 +76,11 @@ class Enemy:
 		self.maxSpeed = max_speed
 		self.colour = colour
 		self.coords = [SIZE[0]-10, SIZE[1]-10]
-		self.pastHits = [False, False, False]
 		self.number = Enemy.enemyNum
 		Enemy.enemyNum += 1
 
 	def update(self, player_coords: List[int], *boundaries):
 		"""Will move enemy toward player, using a unit vector for the direction. Adds in some random variation too"""
-		# TODO: Make avoid boundaries
 		diffX, diffY = player_coords[0] - self.coords[0], player_coords[1] - self.coords[1]
 		# Calculate magnitude of vector
 		vectorMag = pow(pow(abs(diffX), 2) + pow(abs(diffY), 2), .5)
@@ -97,28 +95,19 @@ class Enemy:
 		except ZeroDivisionError:
 			changeY = 0
 
-		# If collided thrice, go back
-		if all(self.pastHits):
-			changeX *= -1
-			changeY *= -1
-
+		# TODO: Avoid boundaries
 		# Apply directions
 		tmpX = self.coords[0] + changeX
 		tmpY = self.coords[1] + changeY
 
-		hit = False
 		# Check for collisions
 		for boundary in boundaries:
 			if boundary.inBound(tmpX, tmpY):
 				# Collision
-				hit = True
 				break
-		# No collisions
-		else:
-			self.coords = [round(tmpX, 2), round(tmpY, 2)]
-
-		# Update past collisions
-		self.pastHits = self.pastHits[1:3] + [hit]
+			# No collisions
+			else:
+				self.coords = [round(tmpX, 2), round(tmpY, 2)]
 
 
 class Collectable:

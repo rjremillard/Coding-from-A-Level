@@ -42,14 +42,20 @@ BOUNDARIES = [
 
 # Generate random boundaries
 for _ in range(BOUNDS_NUM):
-	# Generate vertices
-	# Don't allow to spawn on player or enemies. Also, allows for movement on edges
-	topLeft = (random.randint(10, SIZE[0]-10), random.randint(10, SIZE[1]-10))
-	topRight = (random.randint(topLeft[0]+10, SIZE[0]-10), topLeft[1])
-	bottomLeft = (topLeft[0], random.randint(topLeft[1]+10, SIZE[1]-10))
-	bottomRight = (topRight[0], bottomLeft[1])
-
-	BOUNDARIES.append(Boundary(topLeft, topRight, bottomRight, bottomLeft))
+	while True:
+		# Avoid Bad boundary errors
+		try:
+			# Generate vertices
+			# Don't allow to spawn on player or enemies. Also, allows for movement on edges
+			topLeft = (random.randint(10, SIZE[0]-10), random.randint(10, SIZE[1]-10))
+			topRight = (random.randint(topLeft[0]+10, SIZE[0]-10), topLeft[1])
+			bottomLeft = (topLeft[0], random.randint(topLeft[1]+10, SIZE[1]-10))
+			bottomRight = (topRight[0], bottomLeft[1])
+		except ValueError:
+			continue
+		else:
+			BOUNDARIES.append(Boundary(topLeft, topRight, bottomRight, bottomLeft))
+			break
 
 # Player, enemies, and collectables
 player = Player(3)
@@ -97,8 +103,9 @@ while not done:
 					name += ev.unicode
 
 	if not dead:
-		# Add to alive time
-		aliveTime += 1
+		# Add to alive time, if moving
+		if any(player.speeds):
+			aliveTime += 1
 
 		# Sort keys still pressed
 		for key in keysDown:
