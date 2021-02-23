@@ -1,50 +1,68 @@
 """A model to predict who would survive the titanic"""
 
 import pandas
-import numpy as np
 import re
+import tkinter
+import numpy as np
 
 from sklearn.tree import DecisionTreeRegressor
 
 
+# --- Constants ---
+FILE_PATH = "train.csv"
+TO_REMOVE = ["Ticket", "Cabin"]
+MAPS = {"Sex": {"male": 0, "female": 1}, "Embarked": {"S": 0, "C": 1, "Q": 2}}
+FEATURES = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
+
+# --- Tkinter start ---
+window = tkinter.Tk()
+window.title = "Who Will Survive?"
+
+title = tkinter.Label(master=window, text="Titanic - who will survive?")
+
 # --- Get and clean data ---
-data = pandas.read_csv("train.csv")
+data = pandas.read_csv(FILE_PATH)
 # Removing unneeded columns and empty boxes
-for i in ["Ticket", "Cabin"]:
+for i in TO_REMOVE:
 	del data[i]
 
-# # Set names to titles, use regex
-# def getTitle(name: str) -> str:
-# 	# All titles in the file
-# 	search = re.search(r"(\w+(?=\.))", name)
-# 	return search.group()
-#
-#
-# data["Name"] = data["Name"].apply(getTitle)
-#
-# # Give default age
-# data["Age"] = data["Age"].apply(lambda x: 30 if x == np.NAN else x)
+
+# Set names to titles, use regex
+def getTitleNum(name: str) -> str:
+	# All titles in the file
+	search = re.search(r"(\w+(?=\.))", name)
+	return search.group()
+
+
+data["Name"] = data["Name"].map(getTitleNum)
+
+# Give default age
+data["Age"] = data["Age"].map(lambda x: 30 if x == np.NAN else x)
 
 # Now get rid of NaNs
 data = data.dropna(axis=0)
 
 # Map other qualitative data to quantitative
-maps = {"Sex": {"male": 0, "female": 1}, "Embarked": {"S": 0, "C": 1, "Q": 2}}
-for i in maps.keys():
-	data[i] = data[i].apply(lambda x: maps[i][x])
+for i in MAPS.keys():
+	data[i] = data[i].map(lambda x: MAPS[i][x])
 
 
 # --- Process Data ---
 # Get features and target
 y = data.Survived
 
-features = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
-X = data[features]
+X = data[FEATURES]
 X.head()
 
 model = DecisionTreeRegressor(random_state=1)
 model.fit(X, y)
 
 # Apply
-print(X.head())
-print(model.predict(X.head()))
+predictions = model.predict(X)
+
+print(f"""
+	Actual survived:    {data.Survived.sum()}
+	Predicted survived: {sum(predictions)}
+""")
+
+print(model.feature_importances_)
