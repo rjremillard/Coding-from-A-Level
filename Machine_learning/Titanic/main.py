@@ -34,16 +34,29 @@ for i in maps.keys():
 	DATA[i] = DATA[i].apply(lambda x: maps[i][x])
 
 # Get averages for each header
-AVERAGES = {}
+AVERAGES = []
 for column in DATA.columns:
 	if column == "Name":
 		# Most common as is qualitative
-		AVERAGES[column] = DATA[column].mode().values[0]
+		AVERAGES.append(DATA[column].mode().values[0])
 	else:
-		AVERAGES[column] = DATA[column].mean()
+		AVERAGES.append(DATA[column].mean())
 
 print(AVERAGES)
 
 weights = defaultdict(lambda: 0)
 # Iterate through rows and update weights
+for passenger in DATA.iterrows():
+	passenger = passenger[1]
+	survived = passenger[1]
+	for i in range(2, len(DATA.columns)):
+		if i == 3:
+			pass
+		else:
+			if survived:
+				if passenger[i] > AVERAGES[i]:
+					weights[i] += .1
+				else:
+					weights[i] -= .1
 
+print(weights)
