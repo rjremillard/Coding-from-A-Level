@@ -9,8 +9,8 @@ from tkinter import messagebox
 
 
 # --- Constants ---
-FONT10 = ("comfortaa", 10)
-FONT11 = ("comfortaa", 11)
+FONT10 = ("JetBrains mono", 10)
+FONT11 = ("JetBrains mono", 11)
 PADS = {"padx": 10, "pady": 10}
 
 
@@ -24,7 +24,7 @@ window.title = "Who Will Survive?"
 
 # Title
 title = tkinter.Label(master=window, text="Titanic - who will survive?", font=FONT11)
-title.grid(column=2, columnspan=5, row=0, **PADS)
+title.grid(column=0, columnspan=5, row=0, **PADS)
 
 # Left (User input)
 titleL = tkinter.Label(master=window, text="User Input", font=FONT10)
@@ -65,6 +65,7 @@ entryL7.grid(column=1, row=9, **PADS)
 
 
 def inputHelp():
+	"""Simply shows the input help text"""
 	messagebox.showinfo(
 		"Input Help",
 		"""
@@ -79,7 +80,8 @@ embarked :: Where the passenger embarked (S/C/Q)
 """)
 
 
-def predict():
+def predictFromUser():
+	"""Predicts survival from the user's input, checking data also"""
 	entries = [entryL0.get(), entryL1.get(), entryL2.get(), entryL3.get(), entryL4.get(), entryL5.get(), entryL6.get(),
 		entryL7.get()]
 	if all(map(len, entries)):
@@ -105,10 +107,39 @@ def predict():
 
 inpHelp = tkinter.Button(master=window, text="Input Help", command=inputHelp, font=FONT10)
 inpHelp.grid(column=0, row=10, **PADS)
-submit = tkinter.Button(master=window, text="Submit", command=predict, font=FONT10)
+submit = tkinter.Button(master=window, text="Submit", command=predictFromUser, font=FONT10)
 submit.grid(column=1, row=10, **PADS)
 
 # Right (from file)
+titleR = tkinter.Label(master=window, text="From File", font=FONT10)
+titleR.grid(column=3, columnspan=2, row=1, **PADS)
 
+labelR0 = tkinter.Label(master=window, text="Path to file: ", font=FONT10)
+labelR0.grid(column=3, row=2, **PADS)
+entryR0 = tkinter.Entry(master=window, font=FONT10)
+entryR0.grid(column=4, row=2, **PADS)
+
+
+def predictFromFile():
+	"""Predicts survival from the file provided by the user, checking data also"""
+	FEATURES = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
+	path = entryR0.get()
+	# Matches against common characters in a file path
+	if bool(re.match(r"[\s\w\\/_\-.]+\.csv", path)):
+		try:
+			data = pandas.read_csv(path)
+		except FileNotFoundError:
+			messagebox.showerror("Invalid Input", "That file does not exist")
+		else:
+			data = backend.cleanData(data)
+			X = data[FEATURES]
+			survived = model.predict(X)
+			messagebox.showinfo("Prediction", f"{round(sum(survived))} would have survived")
+	else:
+		messagebox.showerror("Invalid Input", "The file path is incorrect")
+
+
+submitR = tkinter.Button(master=window, text="Submit", command=predictFromFile, font=FONT10)
+submitR.grid(column=3, columnspan=2, row=3, **PADS)
 
 tkinter.mainloop()

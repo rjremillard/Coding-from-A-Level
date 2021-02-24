@@ -7,16 +7,12 @@ import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 
 
-def makeModel(used_internally=False):
-	""":param used_internally: whether it returns X and y"""
-	# --- Constants ---
+def cleanData(data):
+	"""Takes a dataFrame or series and 'cleans' it for use"""
+	# Constants
 	TO_REMOVE = ["Ticket", "Cabin"]
 	MAPS = {"Sex": {"male": 0, "female": 1}, "Embarked": {"S": 0, "C": 1, "Q": 2}}
-	# TODO: Make names matter
-	FEATURES = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
 
-	# --- Get and clean data ---
-	data = pandas.read_csv("train.csv")
 	# Removing unneeded columns and empty boxes
 	for i in TO_REMOVE:
 		del data[i]
@@ -38,6 +34,18 @@ def makeModel(used_internally=False):
 	# Map other qualitative data to quantitative
 	for i in MAPS.keys():
 		data[i] = data[i].map(lambda x: MAPS[i][x])
+
+	return data
+
+
+def makeModel(used_internally=False):
+	""":param used_internally: whether it returns X and y"""
+	# TODO: Make names matter
+	FEATURES = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
+
+	# --- Get and clean data ---
+	data = pandas.read_csv("train.csv")
+	data = cleanData(data)
 
 	# --- Process Data and Make Model ---
 	# Get features and target
