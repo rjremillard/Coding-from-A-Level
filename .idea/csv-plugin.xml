@@ -38,6 +38,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\Section 11\recursion.py">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Section 7\expressionTree.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="&#9;" />
+            </Attribute>
+          </value>
+        </entry>
       </map>
     </option>
   </component>
