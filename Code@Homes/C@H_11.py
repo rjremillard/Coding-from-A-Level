@@ -65,6 +65,8 @@ def searcher(search_type: int):
 
 		if all(map(lambda x: x.lstrip("-").isnumeric(), nums)):
 			# All should be fine now
+			nums = list(map(int, nums))
+			target = int(target)
 			if search_type == 0:
 				time = timeit.timeit(lambda: linear(nums, target))
 				result = linear(nums, target)
@@ -76,6 +78,8 @@ def searcher(search_type: int):
 					messagebox.showerror("Bad Input", "List of numbers needs to be sorted for a binary search")
 					return
 
+			# For printing
+			nums = list(map(str, nums))
 			messagebox.showinfo(
 				"Search Result",
 				f"{target} is{'' if result else 'nt'} in {' '.join(nums[:3])}...{nums[-1]}\nThe search took {round(time, 2)}s"
