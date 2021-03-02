@@ -48,6 +48,13 @@ def searcher(search_type: int):
 	target = entry1.get()
 
 	if target.isnumeric():
+		try:
+			open(nums, "r")
+		except FileNotFoundError:
+			pass
+		else:
+			nums = open(nums, "r").read()
+
 		if "," in nums:
 			nums = nums.split(", ")
 		elif " " in nums:
@@ -56,18 +63,22 @@ def searcher(search_type: int):
 			messagebox.showerror("Bad input", "List of numbers is badly formatted")
 			return
 
-		if all(map(lambda x: x.isnumeric(), nums)):
+		if all(map(lambda x: x.lstrip("-").isnumeric(), nums)):
 			# All should be fine now
 			if search_type == 0:
 				time = timeit.timeit(lambda: linear(nums, target))
 				result = linear(nums, target)
 			elif search_type == 1:
-				time = timeit.timeit(lambda: binary(nums, target))
-				result = binary(nums, target)
+				if sorted(nums) == nums:
+					time = timeit.timeit(lambda: binary(nums, target))
+					result = binary(nums, target)
+				else:
+					messagebox.showerror("Bad Input", "List of numbers needs to be sorted for a binary search")
+					return
 
 			messagebox.showinfo(
 				"Search Result",
-				f"{target} is{'' if result else 'nt'} in {' '.join(nums)}\nThe search took {round(time, 2)}s"
+				f"{target} is{'' if result else 'nt'} in {' '.join(nums[:3])}...{nums[-1]}\nThe search took {round(time, 2)}s"
 			)
 		else:
 			messagebox.showerror("Bad Input", "List of numbers does not fully contain integers")
@@ -80,10 +91,14 @@ def help_():
 		"Help",
 		"""
 The list of numbers input can be:
-	- Space separated integers, or
+	- Space separated integers,
 	- Comma separated integers,
+	- Or a path to a file of the above
 	
 eg., 1 2 3 4 / 1, 2, 3, 4
+
+For large lists, the searches will take a while
+because of the timer
 		"""
 	)
 
