@@ -17,9 +17,9 @@ Controls:
 import pygame
 import random
 import json
+import game_constants
 
 from game_objects import *
-from game_constants import *
 
 
 # Handy function
@@ -43,7 +43,7 @@ BOUNDARIES = [
 # Generate random boundaries
 for _ in range(BOUNDS_NUM):
 	while True:
-		# Avoid Bad boundary errors
+		# Avoid bad boundary errors
 		try:
 			# Generate vertices
 			# Don't allow to spawn on player or enemies. Also, allows for movement on edges
