@@ -15,13 +15,13 @@ PADS = {"padx": 10, "pady": 10}
 
 
 # Functions
-def linear(lst: List[int], target: int) -> bool:
+def linear(lst: List[int], target: int) -> (bool, int):
 	"""Linear search for `target` in `lst`"""
-	for i in lst:
-		if i == target:
-			return True
+	for i in range(len(lst)):
+		if lst[i] == target:
+			return True, i
 	else:
-		return False
+		return False, -1
 
 
 def binary(lst: List[int], target: int) -> bool:
@@ -69,11 +69,12 @@ def searcher(search_type: int):
 			target = int(target)
 			if search_type == 0:
 				time = timeit.timeit(lambda: linear(nums, target))
-				result = linear(nums, target)
+				result, index = linear(nums, target)
 			elif search_type == 1:
 				if sorted(nums) == nums:
 					time = timeit.timeit(lambda: binary(nums, target))
 					result = binary(nums, target)
+					index = nums.index(target)
 				else:
 					messagebox.showerror("Bad Input", "List of numbers needs to be sorted for a binary search")
 					return
@@ -82,7 +83,7 @@ def searcher(search_type: int):
 			nums = list(map(str, nums))
 			messagebox.showinfo(
 				"Search Result",
-				f"{target} is{'' if result else 'nt'} in {' '.join(nums[:3])}...{nums[-1]}\nThe search took {round(time, 2)}s"
+				f"{target} is{'' if result else 'nt'} in {' '.join(nums[:3])}...{nums[-1]} {', at index ' + str(index)}\nThe search took {round(time, 2)}s"
 			)
 		else:
 			messagebox.showerror("Bad Input", "List of numbers does not fully contain integers")
