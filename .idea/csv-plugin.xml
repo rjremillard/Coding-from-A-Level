@@ -87,6 +87,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\section 2\C@H_11pt2\defrag.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="&#9;" />
+            </Attribute>
+          </value>
+        </entry>
       </map>
     </option>
   </component>
