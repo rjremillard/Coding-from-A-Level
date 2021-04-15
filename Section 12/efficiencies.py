@@ -35,17 +35,14 @@ def oliver(end):
 if __name__ == '__main__':
 	import timeit
 	import threading
-
 	import matplotlib.pyplot as plt
-
-	ns = []
-	for i in range(0, 1000, 20):
-		ns.append(i)
 
 	# Not using Patrick, Isobel, or Rowan as were all very slow
 	# Normalised others to return same data
 
 	TIMES = {}
+	ns = [i for i in range(0, 1000, 20)]
+
 
 	def timer(func: callable, name: str):
 		times = []
