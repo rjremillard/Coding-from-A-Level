@@ -4,14 +4,14 @@ def linear(n):
 		a += i
 
 
-def squared(n):
+def square(n):
 	a = 0
 	for i in range(n):
 		for j in range(n):
 			a += j
 
 
-def cubed(n):
+def cubic(n):
 	a = 0
 	for i in range(n):
 		for j in range(n):
@@ -27,7 +27,7 @@ if __name__ == "__main__":
 	
 	from collections import defaultdict
 
-	funcs = [("linear", linear), ("squared", squared), ("cubed", cubed)]
+	funcs = [("linear", linear), ("square", square), ("cubic", cubic)]
 	allTimes = defaultdict(list)
 
 	nMax = 1001
