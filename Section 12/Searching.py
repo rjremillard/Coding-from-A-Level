@@ -102,15 +102,10 @@ if __name__ == "__main__":
         else:
             index = -1
 
-        fail = False
         for algo in [linear, binary, recursiveBinary]:
             if algo(lst, target) != index: 
-                fail = True
-        
-        if fail: break
+                print("Fail!")
         
         head = formTree(lst)
-        if binaryTreeSearch(head, target) != bool(index+1): 
-            break
-    else:
-        print("All good!")
+        if binaryTreeSearch(head, target) != (index != -1): 
+            print("Fail!")
