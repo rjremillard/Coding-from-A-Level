@@ -47,7 +47,7 @@ class Node:
 
     def __add__(self, other: any):
         if other < self.data:
-            if self.left is not None: 
+            if self.left: 
                 self.left + other
             else:
                 self.left = Node(other)
@@ -56,6 +56,20 @@ class Node:
                 self.right + other
             else:
                 self.right = Node(other)
+    
+    def __contains__(self, other: any) -> bool:
+        if self.data == other: 
+            return True
+        elif other < self.data:
+            if self.left:
+                return other in self.left
+            else:
+                return False
+        else:
+            if self.right:
+                return other in self.right
+            else:
+                return False
 
 def formTree(lst: list) -> Node:
     head = Node(lst[len(lst)//2])
@@ -65,16 +79,7 @@ def formTree(lst: list) -> Node:
     return head
 
 def binaryTreeSearch(head: Node, target: any) -> bool:
-    if target == head.data: return True
-
-    elif target < head.data:
-        if head.left:
-            return binaryTreeSearch(head.left, target)
-        else: return False
-    else:
-        if head.right:
-            return binaryTreeSearch(head.right, target)
-        else: return False
+    return target in head
 
 
 if __name__ == "__main__":
@@ -98,17 +103,14 @@ if __name__ == "__main__":
             index = -1
 
         fail = False
-        for algo, name in [(linear, "linear"), (binary, "binary"), (recursiveBinary, "recur bin")]:
+        for algo in [linear, binary, recursiveBinary]:
             if algo(lst, target) != index: 
-                print(f"Failed on {name}")
                 fail = True
-                print(end="")
         
         if fail: break
         
         head = formTree(lst)
         if binaryTreeSearch(head, target) != bool(index+1): 
-            print("Failed")
             break
     else:
         print("All good!")
