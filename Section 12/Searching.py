@@ -45,41 +45,39 @@ class Node:
         self.left = None
         self.right = None
 
-    def __add__(self, other: any):
-        if other < self.data:
-            if self.left: 
-                self.left + other
-            else:
-                self.left = Node(other)
+def addNode(head: Node, data: any):
+    if data < head.data:
+        if head.left:
+            addNode(head.left, data)
         else:
-            if self.right:
-                self.right + other
-            else:
-                self.right = Node(other)
-    
-    def __contains__(self, other: any) -> bool:
-        if self.data == other: 
-            return True
-        elif other < self.data:
-            if self.left:
-                return other in self.left
-            else:
-                return False
+            head.left = Node(data)
+    else:
+        if head.right:
+            addNode(head.right, data)
         else:
-            if self.right:
-                return other in self.right
-            else:
-                return False
+            head.right = Node(data)
 
 def formTree(lst: list) -> Node:
     head = Node(lst[len(lst)//2])
+
     for i in lst:
-        head + i
+        addNode(head, i)
 
     return head
 
 def binaryTreeSearch(head: Node, target: any) -> bool:
-    return target in head
+    if head.data == target:
+        return True
+    elif target < head.data:
+        if head.left:
+            return binaryTreeSearch(head.left, target)
+        else:
+            return False
+    else:
+        if head.right:
+            return binaryTreeSearch(head.right, target)
+        else:
+            return False
 
 
 if __name__ == "__main__":
