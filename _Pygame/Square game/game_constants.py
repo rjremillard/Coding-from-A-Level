@@ -18,7 +18,7 @@ START_TEXT = "Use WASD to move and space to stop\nHitting a wall causes death".s
 DEATH_TEXT = "You have died".split("\n")  # Text displayed on death
 
 # Game controls
-FPS = 120  # Game ticks per second
+FPS = 30  # Game ticks per second
 SIZE = (1200, 700)  # Size of the game screen
 INF = 10000  # A large number to act as infinity
 BOUNDS_NUM = 6  # Number of randomly generated Boundaries

@@ -2,8 +2,9 @@
     - Linear search
     - Binary search
     - Recursive binary search
-
-Each takes a list and a target and returns the index of that target, -1 if not found
+    - Form binary tree
+    - Add node to binary tree
+    - Search binary tree
 """
 
 def linear(lst: list, target: any) -> int:
