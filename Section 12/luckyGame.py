@@ -41,3 +41,16 @@ plt.xlabel("Size")
 plt.ylabel("Guesses")
 plt.legend()
 plt.show()
+
+# Prev x average
+colours = ["b", "y", "g", "r", "c", "m", "pink", "orange", "peru"]
+for farBack in range(1, 10):
+    ys2 = []
+    for j in range(farBack, len(avgs)):
+        ys2.append(mean(avgs[j-farBack: j]))
+    plt.plot(xs[farBack:], ys2, colours[farBack-1], label=f"Average of {farBack} prior")
+
+plt.xlabel("Size")
+plt.ylabel("Guesses")
+plt.legend()
+plt.show()
