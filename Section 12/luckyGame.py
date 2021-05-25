@@ -37,6 +37,12 @@ plt.plot(xs, avgs, "g", label="Average")
 ys1 = list(map(log2, xs))
 plt.plot(xs, ys1, "r", label="log2")
 
+# Previous 7
+ys2 = []
+for i in range(7, len(avgs)):
+    ys2.append(mean(avgs[i-7: i]))
+plt.plot(xs[7:], ys2, "y", label="Mean of 7 prior")
+
 plt.xlabel("Size")
 plt.ylabel("Guesses")
 plt.legend()
@@ -45,10 +51,10 @@ plt.show()
 # Prev x average
 colours = ["b", "y", "g", "r", "c", "m", "pink", "orange", "peru"]
 for farBack in range(1, 10):
-    ys2 = []
+    ys3 = []
     for j in range(farBack, len(avgs)):
-        ys2.append(mean(avgs[j-farBack: j]))
-    plt.plot(xs[farBack:], ys2, colours[farBack-1], label=f"Average of {farBack} prior")
+        ys3.append(mean(avgs[j-farBack: j]))
+    plt.plot(xs[farBack:], ys3, colours[farBack-1], label=f"Average of {farBack} prior")
 
 plt.xlabel("Size")
 plt.ylabel("Guesses")
