@@ -21,7 +21,7 @@ def getData(url: str) -> dict:
         return adjacency 
 
     else:
-        raise "Non-200 Status Code"
+        raise Exception("Non-200 Status Code")
 
 if __name__ == "__main__":
     url = "https://www.cs.utah.edu/~lifeifei/research/tpq/cal.cedge"
