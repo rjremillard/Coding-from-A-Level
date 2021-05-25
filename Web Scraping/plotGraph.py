@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from .gettingGraphs import getData
+from gettingGraphs import getData
 from requests import get
 from collections import defaultdict
 
