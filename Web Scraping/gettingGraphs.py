@@ -1,7 +1,7 @@
 from requests import get
 from collections import defaultdict
 
-def getData(url: str, percent=100) -> dict:
+def getData(url: str, percent: int = 100) -> dict:
     """Gets data at url
     :param url: url to get, hopefully `https://www.cs.utah.edu/~lifeifei/research/tpq/cal.cedge`, or similar
     :param percent: Optional - how much of the data should be considered
