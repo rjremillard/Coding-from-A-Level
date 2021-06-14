@@ -14,7 +14,7 @@ def getData(url: str, percent: int = 100) -> dict:
             line.split() for line in resp.text.split("\n")
         ][:-1]
 
-        adjacency = defaultdict(lambda: defaultdict(int))
+        adjacency = defaultdict(dict)
         for vertex in data[:int(len(data) * (percent/100))]:  # Avoid last (empty)
             # Vertex: [vertex#, start#, end#, weight]
             adjacency[vertex[1]][vertex[2]] = vertex[3]

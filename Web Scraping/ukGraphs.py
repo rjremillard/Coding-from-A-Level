@@ -1,4 +1,4 @@
-import collections
+import json
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
@@ -25,10 +25,5 @@ for child in root:
             adjacency[end][start] = weight
             adjacency[start][end] = weight
 
-with open("Web Scraping/ukData.csv", "w") as f:
-    f.write("nodeID,neighbours\n")
-    for i in list(adjacency.keys())[:5]:
-        neighbours = ""
-        for j in adjacency[i].keys():
-            neighbours += f"{j}:{adjacency[i][j]} "
-        f.write(f"{i},\"{neighbours[:-2]}\"\n")
+with open("Web Scraping/ukData.json", "w") as f:
+    json.dump(adjacency, f)
